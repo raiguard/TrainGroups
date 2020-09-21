@@ -1,4 +1,3 @@
-// replace all instances of `ModTemplate` with the name of your mod
 {
   "version": "0.2.0",
   "configurations": [
@@ -8,7 +7,7 @@
       "name": "Debug",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["ModTemplate", "Sandbox"],
+      "hookControl": ["TrainScheduler", "Sandbox"],
       "factorioArgs": ["--load-scenario", "EditorExtensions/testing"]
     },
     {
@@ -17,7 +16,7 @@
       "name": "Debug (data)",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["ModTemplate", "Sandbox"],
+      "hookControl": ["TrainScheduler", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
       "factorioArgs": ["--load-scenario", "EditorExtensions/testing"]
@@ -28,24 +27,23 @@
       "name": "Debug (trim mods)",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["ModTemplate", "Sandbox"],
+      "hookControl": ["TrainScheduler", "Sandbox"],
       "factorioArgs": ["--load-scenario", "EditorExtensions/testing"],
       "adjustMods": {
         "EditorExtensions": true,
         "flib": true,
-        "ModTemplate": true,
+        "TrainScheduler": true,
         "Sandbox": true
       },
       "disableExtraMods": true
     },
     {
-      // this configuration is only useful if you have factorio source access - otherwise just delete it
       "type": "factoriomod",
       "request": "launch",
       "name": "Debug (src)",
       "factorioPath": "${env:factorioSourceDebug}",
       "hookMode": "debug",
-      "hookControl": ["ModTemplate", "Sandbox"],
+      "hookControl": ["TrainScheduler", "Sandbox"],
       "hookData": true,
       "hookSettings": true
     },
@@ -55,7 +53,7 @@
       "name": "Profile",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "profile",
-      "hookControl": ["ModTemplate", "Sandbox"]
+      "hookControl": ["TrainScheduler", "Sandbox"]
     }
   ]
 }
