@@ -4,7 +4,7 @@ local migration = require("__flib__.migration")
 
 local global_data = require("scripts.global-data")
 local player_data = require("scripts.player-data")
-local tsch_gui = require("scripts.gui.gui")
+local train_gui = require("scripts.gui.train")
 
 -- -----------------------------------------------------------------------------
 -- EVENT HANDLERS
@@ -39,7 +39,7 @@ gui.register_handlers()
 event.on_gui_opened(function(e)
   if not gui.dispatch_handlers(e) then
     if e.entity and e.entity.type == "locomotive" then
-      tsch_gui.create(game.get_player(e.player_index), global.players[e.player_index], e.entity.train)
+      train_gui.create(game.get_player(e.player_index), global.players[e.player_index], e.entity)
     end
   end
 end)
@@ -48,7 +48,7 @@ event.on_gui_closed(function(e)
   if not gui.dispatch_handlers(e) then
     local player_table = global.players[e.player_index]
     if player_table.flags.gui_open then
-      tsch_gui.destroy(game.get_player(e.player_index), player_table)
+      train_gui.destroy(game.get_player(e.player_index), player_table)
     end
   end
 end)
@@ -74,5 +74,25 @@ end)
 -- TRAIN
 
 event.on_train_created(function(e)
-  global_data.migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
+  if e.old_train_id_1 or e.old_train_id_2 then
+    global_data.migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
+  end
 end)
+
+event.register(
+  {
+    defines.events.on_player_mined_entity,
+    defines.events.on_robot_mined_entity,
+    defines.events.on_entity_died,
+    defines.events.script_raised_destroy
+  },
+  function(e)
+    local entity = e.entity
+    local unit_number = entity.unit_number or -1
+    for player_index, entity_number in pairs(global.opened_locomotives) do
+      if entity_number == unit_number then
+        train_gui.destroy(game.get_player(player_index), global.players[player_index])
+      end
+    end
+  end
+)
