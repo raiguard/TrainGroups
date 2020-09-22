@@ -7,8 +7,8 @@
       "name": "Debug",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "Sandbox"],
-      "factorioArgs": ["--load-scenario", "EditorExtensions/testing"]
+      "hookControl": ["TrainScheduler", "level", "Sandbox"],
+      "factorioArgs": ["--load-game", "c:/Files/Development/Factorio/Testbenches/1/saves/Train Scheduler/Dev.zip"]
     },
     {
       "type": "factoriomod",
@@ -16,10 +16,10 @@
       "name": "Debug (data)",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "Sandbox"],
+      "hookControl": ["TrainScheduler", "level", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
-      "factorioArgs": ["--load-scenario", "EditorExtensions/testing"]
+      "factorioArgs": ["--load-game", "c:/Files/Development/Factorio/Testbenches/1/saves/Train Scheduler/Dev.zip"]
     },
     {
       "type": "factoriomod",
@@ -27,8 +27,8 @@
       "name": "Debug (trim mods)",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "Sandbox"],
-      "factorioArgs": ["--load-scenario", "EditorExtensions/testing"],
+      "hookControl": ["TrainScheduler", "level", "Sandbox"],
+      "factorioArgs": ["--load-game", "c:/Files/Development/Factorio/Testbenches/1/saves/Train Scheduler/Dev.zip"],
       "adjustMods": {
         "EditorExtensions": true,
         "flib": true,
@@ -43,7 +43,7 @@
       "name": "Debug (src)",
       "factorioPath": "${env:factorioSourceDebug}",
       "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "Sandbox"],
+      "hookControl": ["TrainScheduler", "level", "Sandbox"],
       "hookData": true,
       "hookSettings": true
     },
@@ -53,7 +53,7 @@
       "name": "Profile",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "profile",
-      "hookControl": ["TrainScheduler", "Sandbox"]
+      "hookControl": ["TrainScheduler", "level", "Sandbox"]
     }
   ]
 }

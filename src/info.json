@@ -1,11 +1,11 @@
 {
-  "name": "ModTemplate",
+  "name": "TrainScheduler",
   "version": "0.1.0",
-  "title": "MOD TEMPLATE",
+  "title": "Train Scheduler",
   "author": "raiguard",
   "contact": "Discord: Raiguard#7402",
-  "homepage": "https://github.com/raiguard/Factorio-ModTemplate",
-  "description": "This is a template for creating Factorio mods based on flib.",
+  "homepage": "https://github.com/raiguard/Factorio-TrainScheduler",
+  "description": "Help with scheduling your trains.",
   "factorio_version": "1.0",
   "dependencies": ["base >= 1.0.0", "flib >= 0.4.0"]
 }
