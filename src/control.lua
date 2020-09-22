@@ -12,6 +12,9 @@ local tsch_gui = require("scripts.gui.gui")
 -- BOOTSTRAP
 
 event.on_init(function()
+  gui.init()
+  gui.build_lookup_tables()
+
   global_data.init()
 
   for i in pairs(game.players) do
@@ -20,11 +23,12 @@ event.on_init(function()
 end)
 
 event.on_load(function()
+  gui.build_lookup_tables()
 end)
 
 event.on_configuration_changed(function(e)
   if migration.on_config_changed(e, {}) then
-
+    gui.check_filter_validity()
   end
 end)
 
@@ -49,7 +53,6 @@ event.on_gui_closed(function(e)
   end
 end)
 
-
 -- PLAYER
 
 event.on_player_created(function(e)
@@ -66,4 +69,10 @@ end)
 
 event.on_player_removed(function(e)
 
+end)
+
+-- TRAIN
+
+event.on_train_created(function(e)
+  global_data.migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
 end)
