@@ -8,7 +8,7 @@
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
       "hookControl": ["TrainScheduler", "level", "Sandbox"],
-      "factorioArgs": ["--load-game", "c:/Files/Development/Factorio/Testbenches/1/saves/Train Scheduler/Dev.zip"]
+      "factorioArgs": ["--load-game", "${env:factorioTestbench1Saves}/Train Scheduler/Dev.zip"]
     },
     {
       "type": "factoriomod",
@@ -19,23 +19,7 @@
       "hookControl": ["TrainScheduler", "level", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
-      "factorioArgs": ["--load-game", "c:/Files/Development/Factorio/Testbenches/1/saves/Train Scheduler/Dev.zip"]
-    },
-    {
-      "type": "factoriomod",
-      "request": "launch",
-      "name": "Debug (trim mods)",
-      "factorioPath": "${env:factorioTestbench1}",
-      "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "level", "Sandbox"],
-      "factorioArgs": ["--load-game", "c:/Files/Development/Factorio/Testbenches/1/saves/Train Scheduler/Dev.zip"],
-      "adjustMods": {
-        "EditorExtensions": true,
-        "flib": true,
-        "TrainScheduler": true,
-        "Sandbox": true
-      },
-      "disableExtraMods": true
+      "factorioArgs": ["--load-game", "${env:factorioTestbench1Saves}/Train Scheduler/Dev.zip"]
     },
     {
       "type": "factoriomod",
