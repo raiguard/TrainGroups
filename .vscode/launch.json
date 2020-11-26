@@ -24,16 +24,6 @@
     {
       "type": "factoriomod",
       "request": "launch",
-      "name": "Debug (src)",
-      "factorioPath": "${env:factorioSourceDebug}",
-      "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "level", "Sandbox"],
-      "hookData": true,
-      "hookSettings": true
-    },
-    {
-      "type": "factoriomod",
-      "request": "launch",
       "name": "Profile",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "profile",

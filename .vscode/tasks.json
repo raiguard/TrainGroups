@@ -3,9 +3,10 @@
   "tasks": [
     {
       "type": "factorio",
-      "label": "Adjust mods",
+      "label": "Set minimal mods",
       "command": "adjustMods",
-      "modsPath": "${env:factorioTestbench1Mods}",
+      // tasks don't support environment variables yet :/
+      "modsPath": "c:/Files/Development/Factorio/Testbenches/1/mods",
       "adjustMods": {
         "EditorExtensions": true,
         "flib": true,
