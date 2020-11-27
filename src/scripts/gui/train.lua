@@ -1,4 +1,5 @@
 local gui = require("__flib__.gui-beta")
+local train_util = require("__flib__.train")
 
 local global_data = require("scripts.global-data")
 
@@ -44,7 +45,7 @@ function train_gui.update_group_dropdown(player, player_table)
     "Select a group"
   }
   local selected = 1
-  for _, data in pairs(global.groups) do
+  for _, data in pairs(global.groups[train_util.get_main_locomotive(gui_data.state.train).force.index]) do
     local new_index = #items + 1
     items[new_index] = data.name
     if group and data.name == group then

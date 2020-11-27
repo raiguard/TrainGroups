@@ -29,6 +29,12 @@ event.on_configuration_changed(function(e)
   end
 end)
 
+-- FORCE
+
+event.on_force_created(function(e)
+  global.groups[e.force.index] = {}
+end)
+
 -- GUI
 
 gui.hook_events(function(e)
