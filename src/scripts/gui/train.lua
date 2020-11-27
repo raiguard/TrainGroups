@@ -42,7 +42,7 @@ function train_gui.update_group_dropdown(player, player_table)
   local train_data = global.trains[gui_data.state.train.id]
   local group = train_data and train_data.group
   local items = {
-    "Select a group"
+    {"tgps-gui.select-a-group"}
   }
   local selected = 1
   for _, data in pairs(global.groups[train_util.get_main_locomotive(gui_data.state.train).force.index]) do
@@ -80,7 +80,6 @@ function train_gui.handle_action(e, msg)
     elseif selected_index > 1 then
       global_data.add_train(train, e.element.items[selected_index])
     end
-    train_gui.update_group_dropdown(player, player_table)
   end
 end
 
