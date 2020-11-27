@@ -44,6 +44,7 @@ function global_data.remove_train(train_data)
   global.trains[train_data.id] = nil
 end
 
+-- TODO: separate groups by force
 function global_data.change_train_group(train_data, new_group)
   -- remove from old group
   local old_group = train_data.group
@@ -82,7 +83,7 @@ function global_data.migrate_trains(train, old_id_1, old_id_2)
     local schedule = train.schedule
     for _, id in ipairs{old_id_1, old_id_2} do
       local train_data = global.trains[id]
-      if train_data and train_data.group then
+      if train_data then
         local group_data = global.groups[train_data.group]
         if group_data and table.deep_compare(schedule.records, group_data.schedule) then
           if not added then
@@ -93,6 +94,39 @@ function global_data.migrate_trains(train, old_id_1, old_id_2)
         global.trains_to_remove[id] = true
         global.flags.trains_need_removing = true
         REGISTER_ON_TICK()
+      end
+    end
+  end
+end
+
+function global_data.update_group_schedule(train)
+  local train_data = global.trains[train.id]
+  -- if the `updating_schedule` flag is active, then it is being updated as a part of another call to this function
+  if train_data and not train_data.updating_schedule then
+    local group_data = global.groups[train_data.group]
+    if group_data then
+      -- update stored schedule for the group
+      local train_schedule = train.schedule
+      group_data.schedule = train_schedule and train_schedule.records
+      -- update schedule for all trains in the group
+      for _, train_id in ipairs(group_data.trains) do
+        if train_id ~= train.id then
+          local other_train_data = global.trains[train_id]
+          if other_train_data then
+            local other_train = other_train_data.train
+            local other_train_schedule = other_train.schedule
+            other_train_data.updating_schedule = true
+            if train_schedule then
+              other_train.schedule = {
+                current = other_train_schedule and other_train_schedule.current or 1,
+                records = train_schedule.records
+              }
+            else
+              other_train.schedule = nil
+            end
+            other_train_data.updating_schedule = nil
+          end
+        end
       end
     end
   end

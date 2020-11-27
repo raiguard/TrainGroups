@@ -101,3 +101,7 @@ event.on_train_created(function(e)
     global_data.migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
   end
 end)
+
+event.on_train_schedule_changed(function(e)
+  global_data.update_group_schedule(e.train)
+end)
