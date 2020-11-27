@@ -3,15 +3,15 @@ local global_data = {}
 local table = require("__flib__.table")
 
 function global_data.init()
-  global.networks = {
-    ["TESTNETWORK"] = {
-      name = "TESTNETWORK",
+  global.groups = {
+    ["TESTGROUP"] = {
+      name = "TESTGROUP",
       colors = {},
       schedule = {},
       trains = {}
     },
-    ["TESTNETWORK2"] = {
-      name = "TESTNETWORK2",
+    ["TESTGROUP2"] = {
+      name = "TESTGROUP2",
       colors = {},
       schedule = {},
       trains = {}
@@ -22,7 +22,7 @@ function global_data.init()
   global.trains = {}
 end
 
-function global_data.add_train(train, network)
+function global_data.add_train(train, group)
   local train_id = train.id
   game.print("ADD TRAIN: ["..train.id.."]")
 
@@ -31,32 +31,32 @@ function global_data.add_train(train, network)
     train = train
   }
 
-  global_data.change_train_network(global.trains[train_id], network)
+  global_data.change_train_group(global.trains[train_id], group)
 end
 
 function global_data.remove_train(train_data)
   game.print("REMOVE TRAIN: ["..train_data.id.."]")
-  global_data.change_train_network(train_data)
+  global_data.change_train_group(train_data)
   global.trains[train_data.id] = nil
 end
 
-function global_data.change_train_network(train_data, new_network)
-  -- remove from old network
-  local old_network = train_data.network
-  if old_network then
-    game.print("CHANGE TRAIN NETWORK: ["..train_data.id.."] | ["..old_network.."] -> ["..(new_network or "").."]")
+function global_data.change_train_group(train_data, new_group)
+  -- remove from old group
+  local old_group = train_data.group
+  game.print("CHANGE TRAIN GROUP: ["..train_data.id.."] | ["..(old_group or "").."] -> ["..(new_group or "").."]")
+  if old_group then
     -- assume this will exist - if it doesn't, we have bigger problems!
-    local network_data = global.networks[old_network]
-    local network_trains = network_data.trains
-    table.remove(network_trains, table.search(network_trains, train_data.id))
+    local group_data = global.groups[old_group]
+    local group_trains = group_data.trains
+    table.remove(group_trains, table.search(group_trains, train_data.id))
   end
-  if new_network then
-    -- add to new network
-    train_data.network = new_network
-    local network_data = global.networks[new_network]
+  if new_group then
+    -- add to new group
+    train_data.group = new_group
+    local group_data = global.groups[new_group]
     -- assume this is valid
-    local network_trains = network_data.trains
-    network_trains[#network_trains+1] = train_data.id
+    local group_trains = group_data.trains
+    group_trains[#group_trains+1] = train_data.id
   end
 end
 

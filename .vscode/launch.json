@@ -7,7 +7,7 @@
       "name": "Debug",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "level", "Sandbox"],
+      "hookControl": ["TrainGroups", "level", "Sandbox"],
       "factorioArgs": ["--load-game", "${env:factorioTestbench1Saves}/Train Scheduler/Dev.zip"]
     },
     {
@@ -16,7 +16,7 @@
       "name": "Debug (data)",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "debug",
-      "hookControl": ["TrainScheduler", "level", "Sandbox"],
+      "hookControl": ["TrainGroups", "level", "Sandbox"],
       "hookData": true,
       "hookSettings": true,
       "factorioArgs": ["--load-game", "${env:factorioTestbench1Saves}/Train Scheduler/Dev.zip"]
@@ -27,7 +27,7 @@
       "name": "Profile",
       "factorioPath": "${env:factorioTestbench1}",
       "hookMode": "profile",
-      "hookControl": ["TrainScheduler", "level", "Sandbox"]
+      "hookControl": ["TrainGroups", "level", "Sandbox"]
     }
   ]
 }

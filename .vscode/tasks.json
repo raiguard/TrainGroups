@@ -10,7 +10,7 @@
       "adjustMods": {
         "EditorExtensions": true,
         "flib": true,
-        "TrainScheduler": true,
+        "TrainGroups": true,
         "Sandbox": true
       },
       "disableExtraMods": true
