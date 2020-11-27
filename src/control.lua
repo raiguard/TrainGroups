@@ -1,3 +1,7 @@
+if __DebugAdapter then
+  __DebugAdapter.defineGlobal("REGISTER_ON_TICK")
+end
+
 local event = require("__flib__.event")
 local gui = require("__flib__.gui-beta")
 local migration = require("__flib__.migration")
@@ -64,6 +68,31 @@ end)
 event.on_player_removed(function(e)
 
 end)
+
+-- TICK
+
+local function on_tick()
+  local deregister = true
+
+  if global.flags.trains_need_removing then
+    game.print("REMOVING TRAINS ON NEXT TICK")
+    for id in pairs(global.trains_to_remove) do
+      global_data.remove_train(global.trains[id])
+    end
+    global.flags.trains_need_removing = false
+    global.trains_to_remove = {}
+  end
+
+  if deregister then
+    event.on_tick(nil)
+  end
+end
+
+REGISTER_ON_TICK = function()
+  if global.flags.trains_need_removing then
+    event.on_tick(on_tick)
+  end
+end
 
 -- TRAIN
 
