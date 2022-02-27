@@ -106,7 +106,6 @@ function global_data.migrate_trains(train, old_id_1, old_id_2)
         end
         global.trains_to_remove[id] = true
         global.flags.trains_need_removing = true
-        REGISTER_ON_TICK()
       end
     end
   end
