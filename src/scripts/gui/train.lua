@@ -9,26 +9,45 @@ function train_gui.create(player, player_table)
   local refs = gui.build(player.gui.relative, {
     {
       type = "frame",
-      caption = {"tgps-gui.groups"},
+      caption = { "tgps-gui.groups" },
       anchor = {
         gui = defines.relative_gui_type.train_gui,
-        position = defines.relative_gui_position.left
+        position = defines.relative_gui_position.left,
       },
-      ref = {"window"},
+      ref = { "window" },
       children = {
-        {type = "frame", style = "inside_shallow_frame_with_padding", direction = "vertical", children = {
-          {type = "flow", style_mods = {vertical_align = "center"}, children = {
-            {type = "label", style = "caption_label", style_mods = {right_margin = 8}, caption = {"tgps-gui.group-label"}},
-            {type = "drop-down", items = {}, ref = {"group_dropdown"}, actions = {on_selection_state_changed = {gui = "train", action = "change_train_group"}}}
-          }}
-        }}
-      }
-    }
+        {
+          type = "frame",
+          style = "inside_shallow_frame_with_padding",
+          direction = "vertical",
+          children = {
+            {
+              type = "flow",
+              style_mods = { vertical_align = "center" },
+              children = {
+                {
+                  type = "label",
+                  style = "caption_label",
+                  style_mods = { right_margin = 8 },
+                  caption = { "tgps-gui.group-label" },
+                },
+                {
+                  type = "drop-down",
+                  items = {},
+                  ref = { "group_dropdown" },
+                  actions = { on_selection_state_changed = { gui = "train", action = "change_train_group" } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   })
 
   player_table.gui.train = {
     refs = refs,
-    state = {}
+    state = {},
   }
 end
 
@@ -42,7 +61,7 @@ function train_gui.update_group_dropdown(player, player_table)
   local train_data = global.trains[gui_data.state.train.id]
   local group = train_data and train_data.group
   local items = {
-    {"tgps-gui.select-a-group"}
+    { "tgps-gui.select-a-group" },
   }
   local selected = 1
   for _, data in pairs(global.groups[train_util.get_main_locomotive(gui_data.state.train).force.index]) do

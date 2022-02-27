@@ -43,7 +43,7 @@ gui.hook_events(function(e)
     msg = {
       gui = "train",
       action = "set_train",
-      train = e.entity.train
+      train = e.entity.train,
     }
   else
     msg = gui.read_action(e)
@@ -63,17 +63,11 @@ event.on_player_created(function(e)
   player_data.refresh(game.get_player(e.player_index), global.players[e.player_index])
 end)
 
-event.on_player_joined_game(function(e)
+event.on_player_joined_game(function(e) end)
 
-end)
+event.on_player_left_game(function(e) end)
 
-event.on_player_left_game(function(e)
-
-end)
-
-event.on_player_removed(function(e)
-
-end)
+event.on_player_removed(function(e) end)
 
 -- TICK
 

@@ -5,7 +5,7 @@ local global_data = {}
 
 function global_data.init()
   global.flags = {
-    trains_need_removing = false
+    trains_need_removing = false,
   }
   -- TODO: generate tables for each force
   global.groups = {
@@ -14,15 +14,15 @@ function global_data.init()
         name = "TESTGROUP",
         colors = {},
         schedule = nil,
-        trains = {}
+        trains = {},
       },
       ["TESTGROUP2"] = {
         name = "TESTGROUP2",
         colors = {},
         schedule = nil,
-        trains = {}
-      }
-    }
+        trains = {},
+      },
+    },
   }
   global.opened_locomotives = {}
   global.players = {}
@@ -32,19 +32,19 @@ end
 
 function global_data.add_train(train, group)
   local train_id = train.id
-  game.print("ADD TRAIN: ["..train.id.."]")
+  game.print("ADD TRAIN: [" .. train.id .. "]")
 
   global.trains[train_id] = {
     force_index = train_util.get_main_locomotive(train).force.index,
     id = train_id,
-    train = train
+    train = train,
   }
 
   global_data.change_train_group(global.trains[train_id], group)
 end
 
 function global_data.remove_train(train_data)
-  game.print("REMOVE TRAIN: ["..train_data.id.."]")
+  game.print("REMOVE TRAIN: [" .. train_data.id .. "]")
   global_data.change_train_group(train_data)
   global.trains[train_data.id] = nil
 end
@@ -53,7 +53,9 @@ end
 function global_data.change_train_group(train_data, new_group)
   -- remove from old group
   local old_group = train_data.group
-  game.print("CHANGE TRAIN GROUP: ["..train_data.id.."] | ["..(old_group or "").."] -> ["..(new_group or "").."]")
+  game.print(
+    "CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]"
+  )
   if old_group then
     -- assume this will exist - if it doesn't, we have bigger problems!
     local group_data = global.groups[train_data.force_index][old_group]
@@ -66,11 +68,11 @@ function global_data.change_train_group(train_data, new_group)
     local group_data = global.groups[train_data.force_index][new_group]
     -- assume this is valid
     local group_trains = group_data.trains
-    group_trains[#group_trains+1] = train_data.id
+    group_trains[#group_trains + 1] = train_data.id
     if group_data.schedule then
       train_data.train.schedule = {
         current = 1,
-        records = group_data.schedule
+        records = group_data.schedule,
       }
     else
       train_data.train.schedule = nil
@@ -82,17 +84,17 @@ function global_data.migrate_trains(train, old_id_1, old_id_2)
   local locomotives = train.locomotives
   if #locomotives.front_movers == 0 and #locomotives.back_movers == 0 then
     -- remove the trains entirely
-    for _, id in ipairs{old_id_1, old_id_2} do
+    for _, id in ipairs({ old_id_1, old_id_2 }) do
       local train_data = global.trains[id]
       if train_data then
         global_data.remove_train(train_data)
       end
     end
   else
-    game.print("MIGRATE TRAIN: ["..train.id.."] <- ["..(old_id_1 or "nil").."] ["..(old_id_2 or "nil").."]")
+    game.print("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
     local added = false
     local schedule = train.schedule
-    for _, id in ipairs{old_id_1, old_id_2} do
+    for _, id in ipairs({ old_id_1, old_id_2 }) do
       local train_data = global.trains[id]
       if train_data then
         local group_data = global.groups[train_data.force_index][train_data.group]
@@ -130,7 +132,7 @@ function global_data.update_group_schedule(train)
             if train_schedule then
               other_train.schedule = {
                 current = other_train_schedule and other_train_schedule.current or 1,
-                records = train_schedule.records
+                records = train_schedule.records,
               }
             else
               other_train.schedule = nil
