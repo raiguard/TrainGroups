@@ -68,13 +68,10 @@ event.on_player_removed(function(e) end)
 -- TICK
 
 event.on_tick(function()
-  if global.flags.trains_need_removing then
-    for id in pairs(global.trains_to_remove) do
-      global_data.remove_train(global.trains[id])
-    end
-    global.flags.trains_need_removing = false
-    global.trains_to_remove = {}
+  for id in pairs(global.trains_to_remove) do
+    global_data.remove_train(global.trains[id])
   end
+  global.trains_to_remove = {}
 end)
 
 -- TRAIN

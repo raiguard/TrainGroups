@@ -4,9 +4,6 @@ local train_util = require("__flib__.train")
 local global_data = {}
 
 function global_data.init()
-  global.flags = {
-    trains_need_removing = false,
-  }
   -- TODO: generate tables for each force
   global.groups = {
     [1] = {
@@ -105,7 +102,6 @@ function global_data.migrate_trains(train, old_id_1, old_id_2)
           end
         end
         global.trains_to_remove[id] = true
-        global.flags.trains_need_removing = true
       end
     end
   end
