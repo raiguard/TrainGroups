@@ -25,26 +25,23 @@ end
 --- @param force LuaForce
 function groups.init_force(force)
   --- @type table<string, GroupData>
-  global.groups[force.index] = {
-    ["Test group"] = {
-      name = "Test group",
-      trains = {},
-    },
-  }
+  global.groups[force.index] = {}
 end
 
 --- @param train LuaTrain
 --- @param group string
+--- @return TrainData
 function groups.add_train(train, group)
   local train_id = train.id
   game.print("ADD TRAIN: [" .. train.id .. "]")
 
   --- @type TrainData
-  global.trains[train_id] = {
+  local train_data = {
     force = train_util.get_main_locomotive(train).force.index,
     id = train_id,
     train = train,
   }
+  global.trains[train_id] = train_data
 
   groups.change_train_group(global.trains[train_id], group)
 end
@@ -69,12 +66,25 @@ function groups.change_train_group(train_data, new_group)
     local group_data = global.groups[train_data.force][old_group]
     local group_trains = group_data.trains
     table.remove(group_trains, table.find(group_trains, train_data.id))
+
+    if #group_data.trains == 0 then
+      global.groups[train_data.force][old_group] = nil
+      -- TODO: Update all dropdowns
+    end
   end
   if new_group then
     -- add to new group
     train_data.group = new_group
     local group_data = global.groups[train_data.force][new_group]
-    -- assume this is valid
+    if not group_data then
+      -- Create group data if it doesn't exist
+      group_data = {
+        name = new_group,
+        trains = {},
+      }
+      global.groups[train_data.force][new_group] = group_data
+      -- TODO: Update all dropdowns
+    end
     local group_trains = group_data.trains
     group_trains[#group_trains + 1] = train_data.id
 
