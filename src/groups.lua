@@ -69,7 +69,6 @@ function groups.change_train_group(train_data, new_group)
 
     if #group_data.trains == 0 then
       global.groups[train_data.force][old_group] = nil
-      -- TODO: Update all dropdowns
     end
   end
   if new_group then
@@ -83,7 +82,6 @@ function groups.change_train_group(train_data, new_group)
         trains = {},
       }
       global.groups[train_data.force][new_group] = group_data
-      -- TODO: Update all dropdowns
     end
     local group_trains = group_data.trains
     group_trains[#group_trains + 1] = train_data.id

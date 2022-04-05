@@ -74,11 +74,10 @@ function gui.build(player, train)
         {
           type = "textfield",
           name = "textfield",
-          style = "long_number_textfield",
-          text = "foo",
           visible = false,
           actions = {
             on_confirmed = "create_group",
+            on_text_changed = "update_textfield_style",
           },
         },
         {
@@ -114,6 +113,7 @@ function gui.handle_dropdown_selection(elem, train)
     elem.parent.textfield.visible = true --- @diagnostic disable-line
     elem.parent.textfield.text = "" --- @diagnostic disable-line
     elem.parent.textfield.focus() --- @diagnostic disable-line
+    gui.update_textfield_style(elem.parent.textfield) --- @diagnostic disable-line
     elem.parent.confirm_button.visible = true --- @diagnostic disable-line
     return
   else
@@ -142,7 +142,6 @@ end
 --- @param train LuaTrain
 function gui.create_group(elem, train)
   local group_name = elem.parent.textfield.text --- @diagnostic disable-line
-  -- TODO: Color the textfield red when it's empty
   if #group_name == 0 then
     return
   end
@@ -166,6 +165,15 @@ function gui.refresh_dropdown(dropdown, train)
   local items, selected_index = get_dropdown_items(train)
   dropdown.items = items
   dropdown.selected_index = selected_index
+end
+
+--- @param textfield LuaGuiElement
+function gui.update_textfield_style(textfield, _)
+  if #textfield.text > 0 then
+    textfield.style = "textbox"
+  else
+    textfield.style = "invalid_value_textfield"
+  end
 end
 
 return gui
