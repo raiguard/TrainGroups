@@ -58,9 +58,7 @@ end
 function groups.change_train_group(train_data, new_group)
   -- Remove from old group
   local old_group = train_data.group
-  LOG(
-    "CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]"
-  )
+  LOG("CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]")
   if old_group then
     -- Assume this will exist - if it doesn't, we have bigger problems!
     local group_data = global.groups[train_data.force][old_group]
