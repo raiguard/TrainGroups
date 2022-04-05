@@ -77,6 +77,8 @@ function groups.change_train_group(train_data, new_group)
       -- Create group data if it doesn't exist
       group_data = {
         name = new_group,
+        -- Use the schedule for the current train as the base
+        schedule = train_data.train.schedule and train_data.train.schedule.records,
         trains = {},
       }
       global.groups[train_data.force][new_group] = group_data
