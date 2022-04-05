@@ -18,7 +18,6 @@ local global_data = {}
 function global_data.init()
   --- @type table<number, table<string, GroupData>>
   global.groups = {}
-  global.players = {}
   --- @type table<number, TrainData>
   global.trains = {}
 end
