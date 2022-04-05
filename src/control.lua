@@ -69,15 +69,6 @@ event.on_player_left_game(function(e) end)
 
 event.on_player_removed(function(e) end)
 
--- TICK
-
-event.on_tick(function()
-  for id in pairs(global.trains_to_remove) do
-    global_data.remove_train(global.trains[id])
-  end
-  global.trains_to_remove = {}
-end)
-
 -- TRAIN
 
 event.on_train_created(function(e)

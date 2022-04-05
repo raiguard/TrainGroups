@@ -21,7 +21,6 @@ function global_data.init()
   global.players = {}
   --- @type table<number, TrainData>
   global.trains = {}
-  global.trains_to_remove = {}
 end
 
 --- @param force LuaForce
@@ -120,7 +119,7 @@ function global_data.migrate_trains(train, old_id_1, old_id_2)
             global_data.add_train(train, train_data.group)
           end
         end
-        global.trains_to_remove[id] = true
+        global_data.remove_train(train_data)
       end
     end
   end
