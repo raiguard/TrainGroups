@@ -14,6 +14,10 @@ local train_gui = require("scripts.gui.train")
 event.on_init(function()
   global_data.init()
 
+  for _, force in pairs(game.forces) do
+    global_data.init_force(force)
+  end
+
   for i in pairs(game.players) do
     player_data.init(i)
     player_data.refresh(game.get_player(i), global.players[i])
@@ -28,7 +32,7 @@ end)
 -- FORCE
 
 event.on_force_created(function(e)
-  global.groups[e.force.index] = {}
+  global_data.init_force(e.force)
 end)
 
 -- GUI
@@ -83,10 +87,5 @@ event.on_train_created(function(e)
 end)
 
 event.on_train_schedule_changed(function(e)
-  if global.ignore_schedule_change[e.train.id] then
-    global.ignore_schedule_change[e.train.id] = nil
-    return
-  end
-
   global_data.update_group_schedule(e.train)
 end)
