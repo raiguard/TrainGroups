@@ -56,13 +56,13 @@ end
 --- @param train_data TrainData
 --- @param new_group? string
 function groups.change_train_group(train_data, new_group)
-  -- remove from old group
+  -- Remove from old group
   local old_group = train_data.group
   game.print(
     "CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]"
   )
   if old_group then
-    -- assume this will exist - if it doesn't, we have bigger problems!
+    -- Assume this will exist - if it doesn't, we have bigger problems!
     local group_data = global.groups[train_data.force][old_group]
     local group_trains = group_data.trains
     table.remove(group_trains, table.find(group_trains, train_data.id))
@@ -72,7 +72,7 @@ function groups.change_train_group(train_data, new_group)
     end
   end
   if new_group then
-    -- add to new group
+    -- Add to new group
     train_data.group = new_group
     local group_data = global.groups[train_data.force][new_group]
     if not group_data then
@@ -105,7 +105,7 @@ end
 function groups.migrate_trains(train, old_id_1, old_id_2)
   local locomotives = train.locomotives
   if #locomotives.front_movers == 0 and #locomotives.back_movers == 0 then
-    -- remove the trains entirely
+    -- Remove the trains entirely
     for _, id in ipairs({ old_id_1, old_id_2 }) do
       local train_data = global.trains[id]
       if train_data then
@@ -138,10 +138,23 @@ function groups.update_group_schedule(train)
   if train_data and not train_data.updating_schedule then
     local group_data = global.groups[train_data.force][train_data.group]
     if group_data then
-      -- update stored schedule for the group
+      -- Update stored schedule for the group
       local train_schedule = train.schedule
-      group_data.schedule = train_schedule and train_schedule.records
-      -- update schedule for all trains in the group
+      if train_schedule then
+        -- Sanitize train control signals from the schedule
+        for _, record in pairs(train_schedule.records) do
+          record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+        end
+        -- If nothing actually changed, don't do anything else
+        if table.deep_compare(train_schedule.records, group_data.schedule or {}) then
+          game.print("TRAIN CONTROL SIGNALS MODIFIED")
+          return
+        end
+        group_data.schedule = train_schedule.records
+      else
+        group_data.schedule = nil
+      end
+      -- Update schedule for all trains in the group
       for _, train_id in ipairs(group_data.trains) do
         if train_id ~= train.id then
           local other_train_data = global.trains[train_id]

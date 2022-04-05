@@ -67,5 +67,6 @@ event.on_train_created(function(e)
 end)
 
 event.on_train_schedule_changed(function(e)
+  game.print("SCHEDULE CHANGED")
   groups.update_group_schedule(e.train)
 end)
