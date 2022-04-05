@@ -21,6 +21,8 @@ function global_data.init()
       },
     },
   }
+  --- @type table<number, boolean>
+  global.ignore_schedule_change = {}
   global.opened_locomotives = {}
   global.players = {}
   global.trains = {}
@@ -66,6 +68,8 @@ function global_data.change_train_group(train_data, new_group)
     -- assume this is valid
     local group_trains = group_data.trains
     group_trains[#group_trains + 1] = train_data.id
+    -- Don't update all schedules this time
+    global.ignore_schedule_change[train_data.id] = true
     if group_data.schedule then
       train_data.train.schedule = {
         current = 1,
@@ -95,7 +99,7 @@ function global_data.migrate_trains(train, old_id_1, old_id_2)
       local train_data = global.trains[id]
       if train_data then
         local group_data = global.groups[train_data.force_index][train_data.group]
-        if group_data and table.deep_compare(schedule.records, group_data.schedule) then
+        if group_data and (not group_data.schedule or table.deep_compare(schedule.records, group_data.schedule)) then
           if not added then
             added = true
             global_data.add_train(train, train_data.group)

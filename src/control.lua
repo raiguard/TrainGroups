@@ -83,5 +83,10 @@ event.on_train_created(function(e)
 end)
 
 event.on_train_schedule_changed(function(e)
+  if global.ignore_schedule_change[e.train.id] then
+    global.ignore_schedule_change[e.train.id] = nil
+    return
+  end
+
   global_data.update_group_schedule(e.train)
 end)
