@@ -60,7 +60,7 @@ function global_data.change_train_group(train_data, new_group)
     -- assume this will exist - if it doesn't, we have bigger problems!
     local group_data = global.groups[train_data.force_index][old_group]
     local group_trains = group_data.trains
-    table.remove(group_trains, table.search(group_trains, train_data.id))
+    table.remove(group_trains, table.find(group_trains, train_data.id))
   end
   if new_group then
     -- add to new group
