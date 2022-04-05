@@ -33,7 +33,7 @@ end
 --- @return TrainData
 function groups.add_train(train, group)
   local train_id = train.id
-  game.print("ADD TRAIN: [" .. train.id .. "]")
+  LOG("ADD TRAIN: [" .. train.id .. "]")
 
   --- @type TrainData
   local train_data = {
@@ -48,7 +48,7 @@ end
 
 --- @param train_data TrainData
 function groups.remove_train(train_data)
-  game.print("REMOVE TRAIN: [" .. train_data.id .. "]")
+  LOG("REMOVE TRAIN: [" .. train_data.id .. "]")
   groups.change_train_group(train_data)
   global.trains[train_data.id] = nil
 end
@@ -58,7 +58,7 @@ end
 function groups.change_train_group(train_data, new_group)
   -- Remove from old group
   local old_group = train_data.group
-  game.print(
+  LOG(
     "CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]"
   )
   if old_group then
@@ -113,7 +113,7 @@ function groups.migrate_trains(train, old_id_1, old_id_2)
       end
     end
   else
-    game.print("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
+    LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
     local added = false
     local schedule = train.schedule
     for _, id in ipairs({ old_id_1, old_id_2 }) do
@@ -147,7 +147,7 @@ function groups.update_group_schedule(train)
         end
         -- If nothing actually changed, don't do anything else
         if table.deep_compare(train_schedule.records, group_data.schedule or {}) then
-          game.print("TRAIN CONTROL SIGNALS MODIFIED")
+          LOG("TRAIN CONTROL SIGNALS MODIFIED")
           return
         end
         group_data.schedule = train_schedule.records

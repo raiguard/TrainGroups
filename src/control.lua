@@ -1,12 +1,15 @@
 local event = require("__flib__.event")
 local gui_util = require("__flib__.gui")
-local migration = require("__flib__.migration")
 
 local gui = require("gui")
 local groups = require("groups")
 
--- -----------------------------------------------------------------------------
--- EVENT HANDLERS
+DEBUG = false
+function LOG(msg)
+  if __DebugAdapter or DEBUG then
+    log(msg)
+  end
+end
 
 -- BOOTSTRAP
 
@@ -15,11 +18,6 @@ event.on_init(function()
 
   for _, force in pairs(game.forces) do
     groups.init_force(force)
-  end
-end)
-
-event.on_configuration_changed(function(e)
-  if migration.on_config_changed(e, {}) then
   end
 end)
 
@@ -35,7 +33,7 @@ gui_util.hook_events(function(e)
   local action = gui_util.read_action(e)
   if action then
     local player = game.get_player(e.player_index)
-    -- We probably don't need all of these checks, but you can't be too safe
+    -- We probably don't need all of these checks here, but you can't be too safe
     if player.opened_gui_type == defines.gui_type.entity and player.opened and player.opened.type == "locomotive" then
       gui[action](e.element, player.opened.train)
     end
@@ -54,10 +52,6 @@ event.on_gui_closed(function(e)
   end
 end)
 
--- PLAYER
-
-event.on_player_created(function(e) end)
-
 -- TRAIN
 
 event.on_train_created(function(e)
@@ -67,6 +61,6 @@ event.on_train_created(function(e)
 end)
 
 event.on_train_schedule_changed(function(e)
-  game.print("SCHEDULE CHANGED")
+  LOG("SCHEDULE CHANGED")
   groups.update_group_schedule(e.train)
 end)
