@@ -21,7 +21,7 @@ local function get_dropdown_items(train)
   table.sort(group_names)
 
   -- Assemble dropdown items
-  local dropdown_items = { { "gui.tgps-select-group" } }
+  local dropdown_items = { { "gui.tgps-no-group" } }
   local selected = 1
   -- If the train data doesn't exist then it will naturally select the "no group" item
   local train_data = global.trains[train.id] or {}
