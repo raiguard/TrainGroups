@@ -47,6 +47,11 @@ end
 --- @param player LuaPlayer
 --- @param train LuaTrain
 function gui.build(player, train)
+  -- Just in case
+  if player.gui.relative["tgps-window"] then
+    gui.destroy(player)
+  end
+
   local dropdown_items, selected = get_dropdown_items(train)
 
   gui_util.build(player.gui.relative, {
