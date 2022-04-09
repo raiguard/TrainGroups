@@ -135,46 +135,57 @@ end
 --- @param train LuaTrain
 function groups.update_group_schedule(train)
   local train_data = global.trains[train.id]
-  if train_data and not train_data.updating_schedule then
-    local group_data = global.groups[train_data.force][train_data.group]
-    if group_data then
-      -- Update stored schedule for the group
-      local train_schedule = train.schedule
-      if train_schedule then
-        -- Sanitize train control signals from the schedule
-        for _, record in pairs(train_schedule.records) do
-          record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
-        end
-        -- If nothing actually changed, don't do anything else
-        if table.deep_compare(train_schedule.records, group_data.schedule or {}) then
-          LOG("TRAIN CONTROL SIGNALS MODIFIED")
-          return
-        end
-        group_data.schedule = train_schedule.records
-      else
-        group_data.schedule = nil
-      end
-      -- Update schedule for all trains in the group
-      for _, train_id in ipairs(group_data.trains) do
-        if train_id ~= train.id then
-          local other_train_data = global.trains[train_id]
-          if other_train_data then
-            local other_train = other_train_data.train
-            local other_train_schedule = other_train.schedule
-            other_train_data.updating_schedule = true
-            if train_schedule then
-              other_train.schedule = {
-                current = other_train_schedule and other_train_schedule.current or 1,
-                records = train_schedule.records,
-              }
-            else
-              other_train.schedule = nil
-            end
-            other_train_data.updating_schedule = nil
+  if not train_data or train_data.updating_schedule then
+    return
+  end
+
+  local group_data = global.groups[train_data.force][train_data.group]
+  if not group_data then
+    return
+  end
+
+  -- Update stored schedule for the group
+  local train_schedule = train.schedule
+  if train_schedule then
+    -- Sanitize TCS skip signal from the schedule
+    for _, record in pairs(train_schedule.records) do
+      record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+    end
+    group_data.schedule = train_schedule.records
+  else
+    group_data.schedule = nil
+  end
+
+  -- Update schedule for all trains in the group
+  local to_remove = {}
+  for _, other_id in ipairs(group_data.trains) do
+    if other_id ~= train.id then
+      local other_train_data = global.trains[other_id]
+      if other_train_data then
+        if other_train_data.train and other_train_data.train.valid then
+          local other_train = other_train_data.train
+          local other_train_schedule = other_train.schedule
+          other_train_data.updating_schedule = true
+          if train_schedule then
+            other_train.schedule = {
+              current = other_train_schedule and other_train_schedule.current or 1,
+              records = train_schedule.records,
+            }
+          else
+            other_train.schedule = nil
           end
+          other_train_data.updating_schedule = nil
+        else
+          table.insert(to_remove, other_id)
         end
       end
     end
+  end
+
+  -- Remove all invalid trains
+  for _, invalid_id in pairs(to_remove) do
+    LOG("INVALID TRAIN: [" .. invalid_id .. "]")
+    groups.remove_train(global.trains[invalid_id])
   end
 end
 

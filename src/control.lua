@@ -4,7 +4,7 @@ local gui_util = require("__flib__.gui")
 local gui = require("gui")
 local groups = require("groups")
 
-DEBUG = false
+DEBUG = true
 function LOG(msg)
   if __DebugAdapter or DEBUG then
     log(msg)
@@ -61,6 +61,9 @@ event.on_train_created(function(e)
 end)
 
 event.on_train_schedule_changed(function(e)
-  LOG("SCHEDULE CHANGED")
-  groups.update_group_schedule(e.train)
+  -- Only update if a player intentionally changed something
+  if e.player_index then
+    LOG("SCHEDULE CHANGED")
+    groups.update_group_schedule(e.train)
+  end
 end)
