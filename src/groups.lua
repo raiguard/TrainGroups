@@ -13,6 +13,15 @@ local train_util = require("__flib__.train")
 --- @field train LuaTrain
 --- @field updating_schedule boolean
 
+--- Remove Train Control Signals skip signal from station names
+--- @param records TrainScheduleRecord[]
+local function remove_skip_signal(records)
+  for _, record in pairs(records) do
+    record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+  end
+  return records
+end
+
 local groups = {}
 
 function groups.init()
@@ -78,7 +87,7 @@ function groups.change_train_group(train_data, new_group)
       group_data = {
         name = new_group,
         -- Use the schedule for the current train as the base
-        schedule = train_data.train.schedule and train_data.train.schedule.records,
+        schedule = train_data.train.schedule and remove_skip_signal(train_data.train.schedule.records),
         trains = {},
       }
       global.groups[train_data.force][new_group] = group_data
@@ -145,16 +154,8 @@ function groups.update_group_schedule(train)
   end
 
   -- Update stored schedule for the group
-  local train_schedule = train.schedule
-  if train_schedule then
-    -- Sanitize TCS skip signal from the schedule
-    for _, record in pairs(train_schedule.records) do
-      record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
-    end
-    group_data.schedule = train_schedule.records
-  else
-    group_data.schedule = nil
-  end
+  local train_schedule = train.schedule and remove_skip_signal(train.schedule.records)
+  group_data.schedule = train_schedule.records
 
   -- Update schedule for all trains in the group
   local to_remove = {}
