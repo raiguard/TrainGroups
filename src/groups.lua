@@ -154,8 +154,8 @@ function groups.update_group_schedule(train)
   end
 
   -- Update stored schedule for the group
-  local train_schedule = train.schedule and remove_skip_signal(train.schedule.records)
-  group_data.schedule = train_schedule.records
+  local records = train.schedule and remove_skip_signal(train.schedule.records)
+  group_data.schedule = records
 
   -- Update schedule for all trains in the group
   local to_remove = {}
@@ -167,10 +167,10 @@ function groups.update_group_schedule(train)
           local other_train = other_train_data.train
           local other_train_schedule = other_train.schedule
           other_train_data.updating_schedule = true
-          if train_schedule then
+          if records then
             other_train.schedule = {
               current = other_train_schedule and other_train_schedule.current or 1,
-              records = train_schedule.records,
+              records = records.records,
             }
           else
             other_train.schedule = nil
