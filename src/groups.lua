@@ -162,7 +162,7 @@ function groups.update_group_schedule(train)
     if other_id ~= train.id then
       local other_train_data = global.trains[other_id]
       if other_train_data then
-        if other_train_data.train and other_train_data.train.valid then
+        if other_train_data.train.valid then
           local other_train = other_train_data.train
           local other_train_schedule = other_train.schedule
           other_train_data.updating_schedule = true
@@ -176,16 +176,16 @@ function groups.update_group_schedule(train)
           end
           other_train_data.updating_schedule = nil
         else
-          table.insert(to_remove, other_id)
+          table.insert(to_remove, other_train_data)
         end
       end
     end
   end
 
   -- Remove all invalid trains
-  for _, invalid_id in pairs(to_remove) do
-    LOG("INVALID TRAIN: [" .. invalid_id .. "]")
-    groups.remove_train(global.trains[invalid_id])
+  for _, invalid_train_data in pairs(to_remove) do
+    LOG("FOUND INVALID TRAIN: [" .. invalid_train_data.id .. "]")
+    groups.remove_train(invalid_train_data)
   end
 end
 
