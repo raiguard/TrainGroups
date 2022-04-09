@@ -89,6 +89,7 @@ function gui.build(player, train)
           type = "sprite-button",
           name = "confirm_button",
           style = "item_and_count_select_confirm",
+          style_mods = { top_margin = 0 },
           sprite = "utility/check_mark",
           visible = false,
           actions = {
