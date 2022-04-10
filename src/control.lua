@@ -134,11 +134,13 @@ event.register({
 end, { { filter = "type", type = "locomotive" } })
 
 event.on_pre_entity_settings_pasted(function(e)
-  local destination_train = e.destination.train
-  local destination_train_data = global.trains[destination_train.id]
-  if destination_train_data then
-    -- Add a flag to ignore the schedule change for the destination train
-    destination_train_data.updating_schedule = true
+  if e.destination.type == "locomotive" then
+    local destination_train = e.destination.train
+    local destination_train_data = global.trains[destination_train.id]
+    if destination_train_data then
+      -- Add a flag to ignore the schedule change for the destination train
+      destination_train_data.updating_schedule = true
+    end
   end
 end)
 
