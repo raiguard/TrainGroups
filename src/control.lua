@@ -134,7 +134,7 @@ event.register({
 end, { { filter = "type", type = "locomotive" } })
 
 event.on_pre_entity_settings_pasted(function(e)
-  if e.destination.type == "locomotive" then
+  if e.source.type == "locomotive" and e.destination.type == "locomotive" then
     local destination_train = e.destination.train
     local destination_train_data = global.trains[destination_train.id]
     if destination_train_data then
