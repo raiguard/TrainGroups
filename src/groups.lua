@@ -13,13 +13,17 @@ local train_util = require("__flib__.train")
 --- @field train LuaTrain
 --- @field updating_schedule boolean
 
---- Remove Train Control Signals skip signal from station names
+--- Remove temporary stations, and remove Train Control Signals skip signal from station names
 --- @param records TrainScheduleRecord[]
-local function remove_skip_signal(records)
+local function sanitize_records(records)
+  local new = {}
   for _, record in pairs(records) do
-    record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+    if record.station then
+      record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+      table.insert(new, record)
+    end
   end
-  return records
+  return new
 end
 
 local groups = {}
@@ -87,7 +91,7 @@ function groups.change_train_group(train_data, new_group)
       group_data = {
         name = new_group,
         -- Use the schedule for the current train as the base
-        schedule = train_data.train.schedule and remove_skip_signal(train_data.train.schedule.records),
+        schedule = train_data.train.schedule and sanitize_records(train_data.train.schedule.records),
         trains = {},
       }
       global.groups[train_data.force][new_group] = group_data
@@ -154,7 +158,7 @@ function groups.update_group_schedule(train)
   end
 
   -- Update stored schedule for the group
-  local records = train.schedule and remove_skip_signal(train.schedule.records)
+  local records = train.schedule and sanitize_records(train.schedule.records)
   group_data.schedule = records
 
   -- Update schedule for all trains in the group
@@ -170,7 +174,7 @@ function groups.update_group_schedule(train)
           if records then
             other_train.schedule = {
               current = other_train_schedule and other_train_schedule.current or 1,
-              records = records.records,
+              records = records,
             }
           else
             other_train.schedule = nil
