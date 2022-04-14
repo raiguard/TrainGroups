@@ -3,6 +3,7 @@ Version: 1.0.1
 Date: ????
   Bugfixes:
     - Fixed a crash when creating an empty blueprint (#1)
+    - Fixed a crash when removing the last station in a schedule while a train was heading towards it (#2)
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 2022-04-10

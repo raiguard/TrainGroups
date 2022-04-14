@@ -173,7 +173,7 @@ function groups.update_group_schedule(train)
           other_train_data.updating_schedule = true
           if records then
             other_train.schedule = {
-              current = other_train_schedule and other_train_schedule.current or 1,
+              current = other_train_schedule and math.min(other_train_schedule.current, #records) or 1,
               records = records,
             }
           else
