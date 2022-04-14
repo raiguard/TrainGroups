@@ -84,7 +84,7 @@ event.on_player_setup_blueprint(function(e)
   end
 
   local entities = bp.get_blueprint_entities()
-  if #entities == 0 then
+  if not entities or #entities == 0 then
     return
   end
   local mapping = e.mapping.get()
