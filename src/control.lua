@@ -4,7 +4,7 @@ local gui_util = require("__flib__.gui")
 local gui = require("gui")
 local groups = require("groups")
 
-DEBUG = true
+DEBUG = false
 function LOG(msg)
   if __DebugAdapter or DEBUG then
     log(msg)

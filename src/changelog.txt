@@ -2,6 +2,7 @@
 Version: 1.0.2
 Date: ????
   Changes:
+    - Disabled debug mode, which I accidentally left enabled
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 2022-04-14
