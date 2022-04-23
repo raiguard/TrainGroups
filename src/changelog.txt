@@ -3,6 +3,7 @@ Version: 1.0.3
 Date: ????
   Bugfixes:
     - Fixed groups not being saved to blueprints consistently (#4)
+    - Fixed that decoupling a 1-1 train would remove the locomotive's train group in some cases (#5)
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.2
 Date: 2022-04-16

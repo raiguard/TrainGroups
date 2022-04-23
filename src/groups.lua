@@ -117,15 +117,7 @@ end
 --- @param old_id_2? number
 function groups.migrate_trains(train, old_id_1, old_id_2)
   local locomotives = train.locomotives
-  if #locomotives.front_movers == 0 and #locomotives.back_movers == 0 then
-    -- Remove the trains entirely
-    for _, id in ipairs({ old_id_1, old_id_2 }) do
-      local train_data = global.trains[id]
-      if train_data then
-        groups.remove_train(train_data)
-      end
-    end
-  else
+  if #locomotives.front_movers > 0 or #locomotives.back_movers > 0 then
     LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
     local added = false
     local schedule = train.schedule
