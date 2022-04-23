@@ -87,13 +87,11 @@ event.on_player_setup_blueprint(function(e)
   if not entities or #entities == 0 then
     return
   end
-  local mapping = e.mapping.get()
 
   local set = false
   for _, bp_entity in pairs(entities) do
     if game.entity_prototypes[bp_entity.name] and game.entity_prototypes[bp_entity.name].type == "locomotive" then
-      --- @type LuaEntity
-      local entity = mapping[bp_entity.entity_number]
+      local entity = e.surface.find_entities_filtered({ name = bp_entity.name, position = bp_entity.position })[1]
       if entity then
         local train = entity.train
         if train and train.valid then
