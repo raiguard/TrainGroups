@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.4
 Date: ????
+  Changes:
+    - Cargo wagons will preserve their train group when decoupled from all locomotives
   Bugfixes:
     - Fixed several more edge cases with 1-1 trains related to Multiple Unit Train Control (#6)
 ---------------------------------------------------------------------------------------------------

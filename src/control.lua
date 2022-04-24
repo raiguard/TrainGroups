@@ -52,6 +52,12 @@ end)
 
 -- INTERACTION
 
+local rolling_stock_types = {
+  ["locomotive"] = true,
+  ["cargo-wagon"] = true,
+  ["fluid-wagon"] = true,
+  ["artillery-wagon"] = true,
+}
 event.on_player_setup_blueprint(function(e)
   local player = game.get_player(e.player_index)
 
@@ -76,7 +82,8 @@ event.on_player_setup_blueprint(function(e)
 
   local set = false
   for _, bp_entity in pairs(entities) do
-    if game.entity_prototypes[bp_entity.name] and game.entity_prototypes[bp_entity.name].type == "locomotive" then
+    local prototype = game.entity_prototypes[bp_entity.name]
+    if prototype and rolling_stock_types[prototype.type] then
       local entity = e.surface.find_entities_filtered({ name = bp_entity.name, position = bp_entity.position })[1]
       if entity then
         local train = entity.train
@@ -115,7 +122,7 @@ event.register({
   end
 
   groups.add_train(entity.train, tags.train_group)
-end, { { filter = "type", type = "locomotive" } })
+end, { { filter = "rolling-stock" } })
 
 event.on_pre_entity_settings_pasted(function(e)
   if e.source.type == "locomotive" and e.destination.type == "locomotive" then
@@ -163,13 +170,11 @@ event.register({
     return
   end
 
-  -- Determine if this is the last locomotive in the train
-  local locomotives = train.locomotives
-  local total = #locomotives.front_movers + #locomotives.back_movers
-  if total == 1 then
+  -- If this is the last rolling stock in the train
+  if #train.carriages == 1 then
     groups.remove_train(train_data)
   end
-end, { { filter = "type", type = "locomotive" } })
+end, { { filter = "rolling-stock" } })
 
 -- TRAIN
 

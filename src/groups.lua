@@ -1,5 +1,4 @@
 local table = require("__flib__.table")
-local train_util = require("__flib__.train")
 
 --- @class GroupData
 --- @field name string
@@ -52,7 +51,7 @@ function groups.add_train(train, group)
 
   --- @type TrainData
   local train_data = {
-    force = train_util.get_main_locomotive(train).force.index,
+    force = train.carriages[1].force.index,
     id = train_id,
     train = train,
   }
@@ -118,23 +117,20 @@ end
 --- @param old_id_1? number
 --- @param old_id_2? number
 function groups.migrate_trains(train, old_id_1, old_id_2)
-  local locomotives = train.locomotives
-  if #locomotives.front_movers > 0 or #locomotives.back_movers > 0 then
-    LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
-    local added = false
-    local schedule = train.schedule
-    for _, id in ipairs({ old_id_1, old_id_2 }) do
-      local train_data = global.trains[id]
-      if train_data then
-        local group_data = global.groups[train_data.force][train_data.group]
-        if group_data and (not group_data.schedule or table.deep_compare(schedule.records, group_data.schedule)) then
-          if not added then
-            added = true
-            groups.add_train(train, train_data.group)
-          end
+  LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
+  local added = false
+  local schedule = train.schedule
+  for _, id in ipairs({ old_id_1, old_id_2 }) do
+    local train_data = global.trains[id]
+    if train_data then
+      local group_data = global.groups[train_data.force][train_data.group]
+      if group_data and (not group_data.schedule or table.deep_compare(schedule.records, group_data.schedule)) then
+        if not added then
+          added = true
+          groups.add_train(train, train_data.group)
         end
-        global.to_delete[train_data.id] = true
       end
+      global.to_delete[train_data.id] = true
     end
   end
 end
