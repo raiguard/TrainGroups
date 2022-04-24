@@ -31,6 +31,8 @@ local groups = {}
 function groups.init()
   --- @type table<number, table<string, GroupData>>
   global.groups = {}
+  --- @type table<number, boolean>
+  global.to_delete = {}
   --- @type table<number, TrainData>
   global.trains = {}
 end
@@ -131,7 +133,7 @@ function groups.migrate_trains(train, old_id_1, old_id_2)
             groups.add_train(train, train_data.group)
           end
         end
-        groups.remove_train(train_data)
+        global.to_delete[train_data.id] = true
       end
     end
   end

@@ -186,3 +186,13 @@ event.on_train_schedule_changed(function(e)
     groups.update_group_schedule(e.train)
   end
 end)
+
+event.on_tick(function()
+  for train_id in pairs(global.to_delete) do
+    local train_data = global.trains[train_id]
+    if train_data then
+      groups.remove_train(train_data)
+    end
+  end
+  global.to_delete = {}
+end)
