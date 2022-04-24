@@ -50,21 +50,7 @@ event.on_gui_closed(function(e)
   end
 end)
 
--- TRAIN
-
-event.on_train_created(function(e)
-  if e.old_train_id_1 or e.old_train_id_2 then
-    groups.migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
-  end
-end)
-
-event.on_train_schedule_changed(function(e)
-  -- Only update if a player intentionally changed something
-  if e.player_index then
-    LOG("SCHEDULE CHANGED")
-    groups.update_group_schedule(e.train)
-  end
-end)
+-- INTERACTION
 
 event.on_player_setup_blueprint(function(e)
   local player = game.get_player(e.player_index)
@@ -184,3 +170,19 @@ event.register({
     groups.remove_train(train_data)
   end
 end, { { filter = "type", type = "locomotive" } })
+
+-- TRAIN
+
+event.on_train_created(function(e)
+  if e.old_train_id_1 or e.old_train_id_2 then
+    groups.migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
+  end
+end)
+
+event.on_train_schedule_changed(function(e)
+  -- Only update if a player intentionally changed something
+  if e.player_index then
+    LOG("SCHEDULE CHANGED")
+    groups.update_group_schedule(e.train)
+  end
+end)
