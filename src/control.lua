@@ -1,4 +1,5 @@
 local event = require("__flib__.event")
+local migration = require("__flib__.migration")
 local gui_util = require("__flib__.gui")
 
 local gui = require("gui")
@@ -19,6 +20,14 @@ event.on_init(function()
   for _, force in pairs(game.forces) do
     groups.init_force(force)
   end
+end)
+
+event.on_configuration_changed(function(e)
+  migration.on_config_changed(e, {
+    ["1.0.4"] = function()
+      global.to_delete = {}
+    end,
+  })
 end)
 
 event.on_force_created(function(e)
