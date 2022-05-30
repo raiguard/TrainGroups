@@ -86,6 +86,18 @@ function gui.build(player, train)
           },
         },
         {
+          type = "choose-elem-button",
+          name = "icon_selector",
+          style = "tool_button",
+          style_mods = { padding = 0 },
+          elem_type = "signal",
+          signal = { type = "virtual", name = "tgps-signal-icon-selector" },
+          visible = false,
+          actions = {
+            on_elem_changed = "add_icon",
+          },
+        },
+        {
           type = "sprite-button",
           name = "confirm_button",
           style = "item_and_count_select_confirm",
@@ -120,10 +132,12 @@ function gui.handle_dropdown_selection(elem, train)
     elem.parent.textfield.text = "" --- @diagnostic disable-line
     elem.parent.textfield.focus() --- @diagnostic disable-line
     gui.update_textfield_style(elem.parent.textfield) --- @diagnostic disable-line
+    elem.parent.icon_selector.visible = true --- @diagnostic disable-line
     elem.parent.confirm_button.visible = true --- @diagnostic disable-line
     return
   else
     elem.parent.textfield.visible = false --- @diagnostic disable-line
+    elem.parent.icon_selector.visible = false --- @diagnostic disable-line
     elem.parent.confirm_button.visible = false --- @diagnostic disable-line
     elem.parent.focus()
   end
@@ -160,6 +174,7 @@ function gui.create_group(elem, train)
   end
 
   elem.parent.confirm_button.visible = false --- @diagnostic disable-line
+  elem.parent.icon_selector.visible = false --- @diagnostic disable-line
   elem.parent.textfield.visible = false --- @diagnostic disable-line
 
   gui.refresh_dropdown(elem.parent.dropdown, train) --- @diagnostic disable-line
@@ -180,6 +195,27 @@ function gui.update_textfield_style(textfield, _)
   else
     textfield.style = "invalid_value_textfield"
   end
+end
+
+--- @param selector LuaGuiElement
+function gui.add_icon(selector, _)
+  --- @type SignalID
+  local value = selector.elem_value
+  local type = value.type
+  if type == "virtual" then
+    type = "virtual-signal"
+  end
+  --- @type LuaGuiElement
+  local textfield = selector.parent.textfield --- @diagnostic disable-line
+  -- We can't read the cursor position, so just stick it at the end
+  textfield.text = textfield.text .. "[" .. type .. "=" .. value.name .. "]"
+
+  -- Always show the icon selector
+  selector.elem_value = { type = "virtual", name = "tgps-signal-icon-selector" }
+
+  gui.update_textfield_style(textfield)
+  textfield.focus()
+  textfield.select(#textfield.text, #textfield.text)
 end
 
 return gui
