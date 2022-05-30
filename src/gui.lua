@@ -92,6 +92,7 @@ function gui.build(player, train)
           name = "icon_selector",
           style = "tool_button",
           style_mods = { padding = 0 },
+          tooltip = { "gui.tgps-choose-icon" },
           elem_type = "signal",
           signal = { type = "virtual", name = "tgps-signal-icon-selector" },
           visible = false,
