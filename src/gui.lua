@@ -15,8 +15,10 @@ local function get_dropdown_items(train)
 
   -- Gather and sort group names
   local group_names = {}
-  for name in pairs(global.groups[locomotive.force.index]) do
+  local group_members = {}
+  for name, data in pairs(global.groups[locomotive.force.index]) do
     table.insert(group_names, name)
+    group_members[name] = #data.trains
   end
   table.sort(group_names)
 
@@ -27,7 +29,7 @@ local function get_dropdown_items(train)
   local train_data = global.trains[train.id] or {}
   if train_data then
     for i, name in pairs(group_names) do
-      table.insert(dropdown_items, name)
+      table.insert(dropdown_items, { "gui.tgps-name-and-members", name, group_members[name] })
       if name == train_data.group then
         selected = i + 1
       end
@@ -143,7 +145,7 @@ function gui.handle_dropdown_selection(elem, train)
   end
 
   -- Change group
-  local group_name = elem.items[elem.selected_index]
+  local group_name = elem.items[elem.selected_index][2]
   local train_data = global.trains[train.id]
   if train_data then
     if elem.selected_index > 1 then

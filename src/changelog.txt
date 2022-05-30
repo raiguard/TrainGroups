@@ -3,6 +3,7 @@ Version: 1.1.0
 Date: ????
   Features:
     - Added an icon selector to the group GUI
+    - Added group member counts to the group GUI
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.4
 Date: 2022-04-28
