@@ -113,6 +113,29 @@ function groups.change_train_group(train_data, new_group)
   end
 end
 
+--- @param force_index number
+--- @param current_name string
+--- @param new_name string
+function groups.rename_group(force_index, current_name, new_name)
+  local group_data = global.groups[force_index][current_name]
+  if not group_data then
+    return
+  end
+
+  -- Update group name and relocate table
+  group_data.name = new_name
+  global.groups[force_index][new_name] = group_data
+  global.groups[force_index][current_name] = nil
+
+  -- Update all trains in the group
+  for _, train_id in pairs(group_data.trains) do
+    local train_data = global.trains[train_id]
+    if train_data then
+      train_data.group = new_name
+    end
+  end
+end
+
 --- @param train LuaTrain
 --- @param old_id_1? number
 --- @param old_id_2? number

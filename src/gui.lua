@@ -79,11 +79,22 @@ function gui.build(player, train)
           },
         },
         {
+          type = "sprite-button",
+          name = "rename_button",
+          style = "tool_button",
+          sprite = "utility/rename_icon_normal",
+          tooltip = { "gui.tgps-rename-group" },
+          visible = selected > 1,
+          actions = {
+            on_click = "toggle_rename_group",
+          },
+        },
+        {
           type = "textfield",
           name = "textfield",
           visible = false,
           actions = {
-            on_confirmed = "create_group",
+            on_confirmed = "handle_confirmed",
             on_text_changed = "update_textfield_style",
           },
         },
@@ -108,7 +119,7 @@ function gui.build(player, train)
           sprite = "utility/check_mark",
           visible = false,
           actions = {
-            on_click = "create_group",
+            on_click = "handle_confirmed",
           },
         },
       },
@@ -131,6 +142,7 @@ end
 function gui.handle_dropdown_selection(elem, train)
   -- Show or hide group creation
   if elem.selected_index == #elem.items then
+    elem.parent.rename_button.visible = false --- @diagnostic disable-line
     elem.parent.textfield.visible = true --- @diagnostic disable-line
     elem.parent.textfield.text = "" --- @diagnostic disable-line
     elem.parent.textfield.focus() --- @diagnostic disable-line
@@ -139,10 +151,16 @@ function gui.handle_dropdown_selection(elem, train)
     elem.parent.confirm_button.visible = true --- @diagnostic disable-line
     return
   else
+    elem.parent.rename_button.visible = true --- @diagnostic disable-line
+    elem.parent.rename_button.style = "tool_button" --- @diagnostic disable-line
     elem.parent.textfield.visible = false --- @diagnostic disable-line
     elem.parent.icon_selector.visible = false --- @diagnostic disable-line
     elem.parent.confirm_button.visible = false --- @diagnostic disable-line
     elem.parent.focus()
+  end
+
+  if elem.selected_index == 1 then
+    elem.parent.rename_button.visible = false --- @diagnostic disable-line
   end
 
   -- Change group
@@ -163,22 +181,43 @@ end
 
 --- @param elem LuaGuiElement
 --- @param train LuaTrain
-function gui.create_group(elem, train)
+function gui.handle_confirmed(elem, train)
   local group_name = elem.parent.textfield.text --- @diagnostic disable-line
   if #group_name == 0 then
     return
   end
 
+  local force_index = train.carriages[1].force.index
+
+  -- Don't allow overwriting an existing group
+  if global.groups[force_index][group_name] then
+    local player = game.get_player(elem.player_index)
+    player.create_local_flying_text({
+      text = { "gui.tgps-group-exists", group_name },
+      create_at_cursor = true,
+    })
+    player.play_sound({ path = "utility/cannot_build" })
+    return
+  end
+
   local train_data = global.trains[train.id]
   if train_data then
-    groups.change_train_group(train_data, group_name)
+    local rename_button = elem.parent.rename_button --- @diagnostic disable-line
+    local is_renaming = rename_button.visible and rename_button.style.name == "flib_selected_tool_button" --- @diagnostic disable-line
+    if is_renaming then
+      groups.rename_group(force_index, train_data.group, group_name)
+    else
+      groups.change_train_group(train_data, group_name)
+    end
   else
     groups.add_train(train, group_name)
   end
 
-  elem.parent.confirm_button.visible = false --- @diagnostic disable-line
-  elem.parent.icon_selector.visible = false --- @diagnostic disable-line
+  elem.parent.rename_button.visible = true --- @diagnostic disable-line
+  elem.parent.rename_button.style = "tool_button" --- @diagnostic disable-line
   elem.parent.textfield.visible = false --- @diagnostic disable-line
+  elem.parent.icon_selector.visible = false --- @diagnostic disable-line
+  elem.parent.confirm_button.visible = false --- @diagnostic disable-line
 
   gui.refresh_dropdown(elem.parent.dropdown, train) --- @diagnostic disable-line
 end
@@ -219,6 +258,25 @@ function gui.add_icon(selector, _)
   gui.update_textfield_style(textfield)
   textfield.focus()
   textfield.select(#textfield.text, #textfield.text)
+end
+
+--- @param rename_button LuaGuiElement
+function gui.toggle_rename_group(rename_button, train)
+  local train_data = global.trains[train.id]
+  if rename_button.style.name == "flib_selected_tool_button" then
+    rename_button.style = "tool_button"
+    rename_button.parent.textfield.visible = false --- @diagnostic disable-line
+    rename_button.parent.icon_selector.visible = false --- @diagnostic disable-line
+    rename_button.parent.confirm_button.visible = false --- @diagnostic disable-line
+  elseif train_data then
+    rename_button.style = "flib_selected_tool_button"
+    rename_button.parent.textfield.text = train_data.group --- @diagnostic disable-line
+    rename_button.parent.textfield.visible = true --- @diagnostic disable-line
+    rename_button.parent.textfield.select_all() --- @diagnostic disable-line
+    rename_button.parent.textfield.focus() --- @diagnostic disable-line
+    rename_button.parent.icon_selector.visible = true --- @diagnostic disable-line
+    rename_button.parent.confirm_button.visible = true --- @diagnostic disable-line
+  end
 end
 
 return gui
