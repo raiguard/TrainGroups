@@ -257,7 +257,7 @@ function gui.add_icon(selector, _)
 
   gui.update_textfield_style(textfield)
   textfield.focus()
-  textfield.select(#textfield.text, #textfield.text)
+  textfield.select(#textfield.text + 1, #textfield.text)
 end
 
 --- @param rename_button LuaGuiElement
