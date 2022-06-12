@@ -47,6 +47,10 @@ end
 --- @return TrainData
 function groups.add_train(train, group)
   local train_id = train.id
+  if global.trains[train_id] then
+    LOG("NOT ADDING TRAIN, DUPLICATE: [" .. train_id .. "]")
+    return
+  end
   LOG("ADD TRAIN: [" .. train.id .. "]")
 
   --- @type TrainData

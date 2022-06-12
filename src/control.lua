@@ -27,6 +27,22 @@ event.on_configuration_changed(function(e)
     ["1.0.4"] = function()
       global.to_delete = {}
     end,
+    ["1.1.1"] = function()
+      -- Remove duplicate train IDs in the trains array
+      for _, force_groups in pairs(global.groups) do
+        for _, group in pairs(force_groups) do
+          local new_trains = {}
+          local hash = {}
+          for _, train_id in pairs(group.trains) do
+            if not hash[train_id] then
+              hash[train_id] = true
+              table.insert(new_trains, train_id)
+            end
+          end
+          group.trains = new_trains
+        end
+      end
+    end,
   })
 end)
 
@@ -167,12 +183,15 @@ event.on_entity_settings_pasted(function(e)
   end
 end)
 
+local reverse_defines = require("__flib__.reverse-defines")
+
 event.register({
   defines.events.on_player_mined_entity,
   defines.events.on_robot_mined_entity,
   defines.events.on_entity_died,
   defines.events.script_raised_destroy,
 }, function(e)
+  LOG("RECEIVED REMOVAL EVENT: " .. reverse_defines.events[e.name])
   local train = e.entity.train
   local train_data = global.trains[train.id]
   if not train_data then
