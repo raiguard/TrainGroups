@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
-Date: ????
+Date: 2022-06-12
   Bugfixes:
     - Fixed that rich text would be selected after insertion (https://todo.sr.ht/~raiguard/factorio-mods/26)
     - Fixed that trains built from blueprints would be added to the group multiple times (https://todo.sr.ht/~raiguard/factorio-mods/25)
