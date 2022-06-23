@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Date: ????
-  Features:
+  Bugfixes:
+    - Fixed that invalid trains were not being removed from groups (https://todo.sr.ht/~raiguard/factorio-mods/35)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 2022-06-12

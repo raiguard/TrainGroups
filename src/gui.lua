@@ -16,9 +16,9 @@ local function get_dropdown_items(train)
   -- Gather and sort group names
   local group_names = {}
   local group_members = {}
-  for name, data in pairs(global.groups[locomotive.force.index]) do
+  for name, group in pairs(global.groups[locomotive.force.index]) do
     table.insert(group_names, name)
-    group_members[name] = #data.trains
+    group_members[name] = table_size(group.trains)
   end
   table.sort(group_names)
 

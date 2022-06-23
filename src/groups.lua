@@ -81,9 +81,9 @@ function groups.change_train_group(train_data, new_group)
     -- Assume this will exist - if it doesn't, we have bigger problems!
     local group_data = global.groups[train_data.force][old_group]
     local group_trains = group_data.trains
-    table.remove(group_trains, table.find(group_trains, train_data.id))
+    group_trains[train_data.id] = nil
 
-    if #group_data.trains == 0 then
+    if table_size(group_data.trains) == 0 then
       global.groups[train_data.force][old_group] = nil
     end
   end
@@ -102,7 +102,7 @@ function groups.change_train_group(train_data, new_group)
       global.groups[train_data.force][new_group] = group_data
     end
     local group_trains = group_data.trains
-    group_trains[#group_trains + 1] = train_data.id
+    group_trains[train_data.id] = train_data
 
     train_data.updating_schedule = true
     if group_data.schedule then
@@ -132,11 +132,8 @@ function groups.rename_group(force_index, current_name, new_name)
   global.groups[force_index][current_name] = nil
 
   -- Update all trains in the group
-  for _, train_id in pairs(group_data.trains) do
-    local train_data = global.trains[train_id]
-    if train_data then
-      train_data.group = new_name
-    end
+  for _, train_data in pairs(group_data.trains) do
+    train_data.group = new_name
   end
 end
 
@@ -180,26 +177,23 @@ function groups.update_group_schedule(train)
 
   -- Update schedule for all trains in the group
   local to_remove = {}
-  for _, other_id in ipairs(group_data.trains) do
+  for other_id, other_data in ipairs(group_data.trains) do
     if other_id ~= train.id then
-      local other_train_data = global.trains[other_id]
-      if other_train_data then
-        if other_train_data.train.valid then
-          local other_train = other_train_data.train
-          local other_train_schedule = other_train.schedule
-          other_train_data.updating_schedule = true
-          if records then
-            other_train.schedule = {
-              current = other_train_schedule and math.min(other_train_schedule.current, #records) or 1,
-              records = records,
-            }
-          else
-            other_train.schedule = nil
-          end
-          other_train_data.updating_schedule = nil
+      if other_data.train.valid then
+        local other_train = other_data.train
+        local other_train_schedule = other_train.schedule
+        other_data.updating_schedule = true
+        if records then
+          other_train.schedule = {
+            current = other_train_schedule and math.min(other_train_schedule.current, #records) or 1,
+            records = records,
+          }
         else
-          table.insert(to_remove, other_train_data)
+          other_train.schedule = nil
         end
+        other_data.updating_schedule = nil
+      else
+        table.insert(to_remove, other_data)
       end
     end
   end

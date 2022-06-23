@@ -27,19 +27,18 @@ event.on_configuration_changed(function(e)
     ["1.0.4"] = function()
       global.to_delete = {}
     end,
-    ["1.1.1"] = function()
-      -- Remove duplicate train IDs in the trains array
+    ["1.1.2"] = function()
+      -- Convert train lists to a hashmap
       for _, force_groups in pairs(global.groups) do
         for _, group in pairs(force_groups) do
-          local new_trains = {}
-          local hash = {}
+          local new = {}
           for _, train_id in pairs(group.trains) do
-            if not hash[train_id] then
-              hash[train_id] = true
-              table.insert(new_trains, train_id)
+            local train_data = global.trains[train_id]
+            if train_data then
+              new[train_id] = train_data
             end
           end
-          group.trains = new_trains
+          group.trains = new
         end
       end
     end,
