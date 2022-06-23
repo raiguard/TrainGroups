@@ -144,7 +144,7 @@ function groups.migrate_trains(train, old_id_1, old_id_2)
   LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
   local added = false
   local schedule = train.schedule
-  for _, id in ipairs({ old_id_1, old_id_2 }) do
+  for _, id in pairs({ old_id_1, old_id_2 }) do
     local train_data = global.trains[id]
     if train_data then
       local group_data = global.groups[train_data.force][train_data.group]
@@ -177,7 +177,7 @@ function groups.update_group_schedule(train)
 
   -- Update schedule for all trains in the group
   local to_remove = {}
-  for other_id, other_data in ipairs(group_data.trains) do
+  for other_id, other_data in pairs(group_data.trains) do
     if other_id ~= train.id then
       if other_data.train.valid then
         local other_train = other_data.train
