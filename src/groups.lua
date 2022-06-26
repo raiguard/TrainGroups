@@ -78,13 +78,15 @@ function groups.change_train_group(train_data, new_group)
   local old_group = train_data.group
   LOG("CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]")
   if old_group then
-    -- Assume this will exist - if it doesn't, we have bigger problems!
     local group_data = global.groups[train_data.force][old_group]
-    local group_trains = group_data.trains
-    group_trains[train_data.id] = nil
-
-    if table_size(group_data.trains) == 0 then
-      global.groups[train_data.force][old_group] = nil
+    -- While this is never supposed to be nil, someone did get a crash with it
+    -- Unfortunately it was a private email
+    if group_data then
+      local group_trains = group_data.trains
+      group_trains[train_data.id] = nil
+      if table_size(group_data.trains) == 0 then
+        global.groups[train_data.force][old_group] = nil
+      end
     end
   end
   if new_group then
