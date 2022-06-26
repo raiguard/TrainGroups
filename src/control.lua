@@ -42,6 +42,27 @@ event.on_configuration_changed(function(e)
         end
       end
     end,
+    ["1.1.4"] = function()
+      local new_groups = {}
+      for force_index, force_groups in pairs(global.groups) do
+        new_groups[force_index] = {}
+        for name, group in pairs(force_groups) do
+          -- Cull any groups that have no trains
+          if table_size(group.trains) > 0 then
+            local new_trains = {}
+            -- Verify that each train belongs to this group
+            for train_id, train_data in pairs(group.trains) do
+              if train_data.group == name then
+                new_trains[train_id] = train_data
+              end
+            end
+            group.trains = new_trains
+            new_groups[force_index][name] = group
+          end
+        end
+      end
+      global.groups = new_groups
+    end,
   })
 end)
 

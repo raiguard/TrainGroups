@@ -3,6 +3,7 @@ Version: 1.1.4
 Date: ????
   Bugfixes:
     - Fixed a crash when changing groups if the old group no longer exists
+    - Fixed various inconsistencies when migrating from before 1.1.2 (https://todo.sr.ht/~raiguard/factorio-mods/37)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.3
 Date: 2022-06-22
