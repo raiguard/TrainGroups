@@ -5,7 +5,6 @@
       "type": "factoriomod",
       "request": "launch",
       "name": "Debug",
-      "factorioPath": "/home/rai/dev/factorio/1/bin/x64/factorio",
       "hookMode": "debug",
       "hookControl": ["TrainGroups", "level", "Sandbox"]
     },
@@ -13,7 +12,6 @@
       "type": "factoriomod",
       "request": "launch",
       "name": "Debug (data)",
-      "factorioPath": "/home/rai/dev/factorio/1/bin/x64/factorio",
       "hookMode": "debug",
       "hookControl": ["TrainGroups", "level", "Sandbox"],
       "hookData": true,
@@ -23,7 +21,6 @@
       "type": "factoriomod",
       "request": "launch",
       "name": "Profile",
-      "factorioPath": "/home/rai/dev/factorio/1/bin/x64/factorio",
       "hookMode": "profile",
       "hookControl": ["TrainGroups", "level", "Sandbox"]
     }
