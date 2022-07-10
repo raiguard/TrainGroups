@@ -2,13 +2,13 @@ local table = require("__flib__.table")
 
 --- @class GroupData
 --- @field name string
---- @field schedule TrainSchedule?
---- @field trains number[]
+--- @field schedule TrainScheduleRecord[]?
+--- @field trains table<uint, TrainData>
 
 --- @class TrainData
---- @field force number
+--- @field force uint
 --- @field group string
---- @field id number
+--- @field id uint
 --- @field train LuaTrain
 --- @field updating_schedule boolean
 
@@ -44,7 +44,7 @@ end
 
 --- @param train LuaTrain
 --- @param group string
---- @return TrainData
+--- @return TrainData?
 function groups.add_train(train, group)
   local train_id = train.id
   if global.trains[train_id] then
