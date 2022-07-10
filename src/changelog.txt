@@ -3,6 +3,7 @@ Version: 1.1.5
 Date: ????
   Bugfixes:
     - Fixed that groups emptied during migration were not being removed (https://todo.sr.ht/~raiguard/factorio-mods/40)
+    - Fixed a crash when the new train has no schedule during train migration (https://todo.sr.ht/~raiguard/factorio-mods/46)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.4
 Date: 2022-06-26
