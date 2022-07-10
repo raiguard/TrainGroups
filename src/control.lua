@@ -20,8 +20,8 @@ local function on_se_elevator()
       remote.call("space-exploration", "get_on_train_teleport_started_event"),
       --- @class on_train_teleport_started_event
       --- @field train LuaTrain
-      --- @field old_train_id_1 integer
-      --- @field old_surface_index integer
+      --- @field old_train_id_1 uint
+      --- @field old_surface_index uint
       --- @field teleporter LuaEntity
       --- @param e on_train_teleport_started_event
       function(e)

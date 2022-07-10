@@ -140,8 +140,8 @@ function groups.rename_group(force_index, current_name, new_name)
 end
 
 --- @param train LuaTrain
---- @param old_id_1 number?
---- @param old_id_2 number?
+--- @param old_id_1 uint?
+--- @param old_id_2 uint?
 function groups.migrate_trains(train, old_id_1, old_id_2)
   LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
   local added = false
