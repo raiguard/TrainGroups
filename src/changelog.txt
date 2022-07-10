@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Date: ????
+  Compatibility:
+    - [Space Exploration] Added support for the space elevator (https://todo.sr.ht/~raiguard/factorio-mods/47)
   Bugfixes:
     - Fixed that groups emptied during migration were not being removed (https://todo.sr.ht/~raiguard/factorio-mods/40)
     - Fixed a crash when the new train has no schedule during train migration (https://todo.sr.ht/~raiguard/factorio-mods/46)

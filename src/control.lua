@@ -12,14 +12,39 @@ function LOG(msg)
   end
 end
 
+-- SPACE EXPLORATION
+
+local function on_se_elevator()
+  if script.active_mods["space-exploration"] then
+    event.register(
+      remote.call("space-exploration", "get_on_train_teleport_started_event"),
+      --- @class on_train_teleport_started_event
+      --- @field train LuaTrain
+      --- @field old_train_id_1 integer
+      --- @field old_surface_index integer
+      --- @field teleporter LuaEntity
+      --- @param e on_train_teleport_started_event
+      function(e)
+        groups.migrate_trains(e.train, e.old_train_id_1)
+      end
+    )
+  end
+end
+
 -- BOOTSTRAP
 
 event.on_init(function()
+  on_se_elevator()
+
   groups.init()
 
   for _, force in pairs(game.forces) do
     groups.init_force(force)
   end
+end)
+
+event.on_load(function()
+  on_se_elevator()
 end)
 
 event.on_configuration_changed(function(e)
