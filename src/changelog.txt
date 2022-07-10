@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.5
-Date: ????
+Date: 2022-07-10
   Compatibility:
     - [Space Exploration] Added support for the space elevator (https://todo.sr.ht/~raiguard/factorio-mods/47)
   Bugfixes:
