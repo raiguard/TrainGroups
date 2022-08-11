@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.6
-Date: ????
+Date: 2022-08-11
   Compatibility:
     - [Space Exploration] Trains going through a space elevator will no longer have their schedule repeatedly synced with the group
   Bugfixes:
