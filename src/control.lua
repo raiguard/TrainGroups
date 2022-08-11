@@ -27,7 +27,11 @@ local function on_se_elevator()
       --- @param e on_train_teleported
       function(e)
         LOG("ON_TRAIN_TELEPORT_STARTED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
-        groups.migrate_trains(e.train, e.old_train_id_1)
+        local old_train_data = global.trains[e.old_train_id_1]
+        if old_train_data then
+          old_train_data.ignore_schedule = true
+          groups.migrate_trains(e.train, e.old_train_id_1)
+        end
       end
     )
     event.register(
@@ -35,6 +39,10 @@ local function on_se_elevator()
       --- @param e on_train_teleported
       function(e)
         LOG("ON_TRAIN_TELEPORT_FINISHED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
+        local train_data = global.trains[e.train.id]
+        if train_data then
+          train_data.ignore_schedule = false
+        end
       end
     )
   end
@@ -96,6 +104,13 @@ event.on_configuration_changed(function(e)
         end
       end
       global.groups = new_groups
+    end,
+    ["1.1.6"] = function()
+      -- updating_schedule was changed to ignore_schedule
+      for _, train_data in pairs(global.trains) do
+        train_data.ignore_schedule = false
+        train_data.updating_schedule = nil
+      end
     end,
   })
 end)
@@ -209,7 +224,7 @@ event.on_pre_entity_settings_pasted(function(e)
     local destination_train_data = global.trains[destination_train.id]
     if destination_train_data then
       -- Add a flag to ignore the schedule change for the destination train
-      destination_train_data.updating_schedule = true
+      destination_train_data.ignore_schedule = true
     end
   end
 end)
@@ -220,10 +235,8 @@ event.on_entity_settings_pasted(function(e)
 
   if source.type == "locomotive" and destination.type == "locomotive" then
     LOG("SETTINGS PASTED")
-
     local source_train = source.train
     local destination_train = destination.train
-
     local source_train_data = global.trains[source_train.id]
     local destination_train_data = global.trains[destination_train.id]
 
@@ -233,6 +246,7 @@ event.on_entity_settings_pasted(function(e)
       groups.add_train(destination_train, source_train_data.group)
     elseif source_train_data and destination_train_data then
       groups.change_train_group(destination_train_data, source_train_data.group)
+      destination_train_data.ignore_schedule = false
     end
   end
 end)

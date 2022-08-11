@@ -10,9 +10,8 @@ local table = require("__flib__.table")
 --- @field group string
 --- @field id uint
 --- @field train LuaTrain
---- @field updating_schedule boolean
+--- @field ignore_schedule boolean
 
---- Remove temporary stations, and remove Train Control Signals skip signal from station names
 local tss_signal_names = {
   "[virtual-signal=train-schedule-output-signal]",
   "[virtual-signal=train-schedule-input-signal]",
@@ -64,8 +63,9 @@ end
 
 --- @param train LuaTrain
 --- @param group string
+--- @param ignore_schedule boolean?
 --- @return TrainData?
-function groups.add_train(train, group)
+function groups.add_train(train, group, ignore_schedule)
   local train_id = train.id
   if global.trains[train_id] then
     LOG("NOT ADDING TRAIN, DUPLICATE: [" .. train_id .. "]")
@@ -78,6 +78,7 @@ function groups.add_train(train, group)
     force = train.carriages[1].force.index,
     id = train_id,
     train = train,
+    ignore_schedule = ignore_schedule or false,
   }
   global.trains[train_id] = train_data
 
@@ -126,16 +127,12 @@ function groups.change_train_group(train_data, new_group)
     local group_trains = group_data.trains
     group_trains[train_data.id] = train_data
 
-    train_data.updating_schedule = true
-    if group_data.schedule then
+    if not train_data.ignore_schedule and group_data.schedule then
       train_data.train.schedule = {
         current = 1,
         records = group_data.schedule,
       }
-    else
-      train_data.train.schedule = nil
     end
-    train_data.updating_schedule = nil
   end
 end
 
@@ -180,7 +177,7 @@ function groups.migrate_trains(train, old_id_1, old_id_2)
         )
       then
         added = true
-        groups.add_train(train, train_data.group)
+        groups.add_train(train, train_data.group, train_data.ignore_schedule)
       end
       global.to_delete[train_data.id] = true
     end
@@ -190,7 +187,7 @@ end
 --- @param train LuaTrain
 function groups.update_group_schedule(train)
   local train_data = global.trains[train.id]
-  if not train_data or train_data.updating_schedule then
+  if not train_data or train_data.ignore_schedule then
     return
   end
 
@@ -200,6 +197,7 @@ function groups.update_group_schedule(train)
   end
 
   -- Update stored schedule for the group
+  LOG("UPDATE SCHEDULE: [" .. train_data.group .. "]")
   local records = train.schedule and sanitize_records(train.schedule.records)
   group_data.schedule = records
 
@@ -210,16 +208,12 @@ function groups.update_group_schedule(train)
       if other_data.train.valid then
         local other_train = other_data.train
         local other_train_schedule = other_train.schedule
-        other_data.updating_schedule = true
         if records then
           other_train.schedule = {
             current = other_train_schedule and math.min(other_train_schedule.current, #records) or 1,
             records = records,
           }
-        else
-          other_train.schedule = nil
         end
-        other_data.updating_schedule = nil
       else
         table.insert(to_remove, other_data)
       end

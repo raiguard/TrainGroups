@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.6
 Date: ????
+  Compatibility:
+    - [Space Exploration] Trains going through a space elevator will no longer have their schedule repeatedly synced with the group
   Bugfixes:
     - Fixed that trains would lose their group when migrated if they had stations using train control signals or train schedule signals in their schedule (https://todo.sr.ht/~raiguard/factorio-mods/62)
 ---------------------------------------------------------------------------------------------------
