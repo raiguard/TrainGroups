@@ -2,7 +2,7 @@
 Version: 1.1.6
 Date: ????
   Bugfixes:
-    - Fixed that trains would lose their group when migrated if they had stations using train control signals in their schedule (https://todo.sr.ht/~raiguard/factorio-mods/62)
+    - Fixed that trains would lose their group when migrated if they had stations using train control signals or train schedule signals in their schedule (https://todo.sr.ht/~raiguard/factorio-mods/62)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Date: 2022-07-10

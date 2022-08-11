@@ -24,6 +24,12 @@ Any changes made to a schedule will be immediately reflected in the schedules of
 
 ## Compatibility
 
+In general, any changes made to schedules by mods will be ignored; only edits made by players will be synced. The following exceptions have been made:
+
+### Train Control Signals
+
 The skip signal from [Train Control Signals](https://mods.factorio.com/mod/Train_Control_Signals) will be filtered out when syncing schedules. This causes it to temporarily disappear from the other trains when the schedule is edited, but does not affect the functionality of TCS.
 
-Any changes made to schedules by mods (e.g. TCS, LTN, or TSM) will be ignored. Only edits made by players will be synced.
+### Train Schedule Signals
+
+All wait conditions on stations utilizing [Train Schedule Signals](https://mods.factorio.com/mod/TrainScheduleSignals) will be ignored, as those are managed directly by TSS.

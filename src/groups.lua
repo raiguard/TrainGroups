@@ -13,12 +13,32 @@ local table = require("__flib__.table")
 --- @field updating_schedule boolean
 
 --- Remove temporary stations, and remove Train Control Signals skip signal from station names
+local tss_signal_names = {
+  "[virtual-signal=train-schedule-output-signal]",
+  "[virtual-signal=train-schedule-input-signal]",
+  "[virtual-signal=refuel-signal]", -- This is actually from TCS, but TSS uses it if present
+}
+local tss_present = script.active_mods["TrainScheduleSignals"]
+--- Remove temporary stations, remove Train Control Signals skip signal, and remove wait conditions if
+--- they are being managed by Train Schedule Signals
 --- @param records TrainScheduleRecord[]
 local function sanitize_records(records)
   local new = {}
   for _, record in pairs(records) do
-    if record.station then
-      record.station = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+    local station_name = record.station
+    if station_name then
+      -- Remove TCS skip signal if present
+      station_name = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+      record.station = station_name
+      -- Remove wait conditions if TSS is being used
+      if tss_present then
+        for _, signal in pairs(tss_signal_names) do
+          if string.find(station_name, signal, 1, true) then
+            record.wait_conditions = nil
+            break
+          end
+        end
+      end
       table.insert(new, record)
     end
   end
