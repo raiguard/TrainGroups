@@ -8,24 +8,33 @@ local groups = require("groups")
 DEBUG = false
 function LOG(msg)
   if __DebugAdapter or DEBUG then
-    log(msg)
+    log({ "", "[" .. game.tick .. "] ", msg })
   end
 end
 
 -- SPACE EXPLORATION
 
+--- @class on_train_teleported
+--- @field train LuaTrain
+--- @field old_train_id_1 uint
+--- @field old_surface_index uint
+--- @field teleporter LuaEntity
+
 local function on_se_elevator()
   if script.active_mods["space-exploration"] then
     event.register(
       remote.call("space-exploration", "get_on_train_teleport_started_event"),
-      --- @class on_train_teleport_started_event
-      --- @field train LuaTrain
-      --- @field old_train_id_1 uint
-      --- @field old_surface_index uint
-      --- @field teleporter LuaEntity
-      --- @param e on_train_teleport_started_event
+      --- @param e on_train_teleported
       function(e)
+        LOG("ON_TRAIN_TELEPORT_STARTED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
         groups.migrate_trains(e.train, e.old_train_id_1)
+      end
+    )
+    event.register(
+      remote.call("space-exploration", "get_on_train_teleport_finished_event"),
+      --- @param e on_train_teleported
+      function(e)
+        LOG("ON_TRAIN_TELEPORT_FINISHED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
       end
     )
   end
@@ -236,8 +245,8 @@ event.register({
   defines.events.on_entity_died,
   defines.events.script_raised_destroy,
 }, function(e)
-  LOG("RECEIVED REMOVAL EVENT: " .. reverse_defines.events[e.name])
   local train = e.entity.train
+  LOG(string.upper(reverse_defines.events[e.name]) .. ": [" .. train.id .. "]")
   local train_data = global.trains[train.id]
   if not train_data then
     return
@@ -258,9 +267,9 @@ event.on_train_created(function(e)
 end)
 
 event.on_train_schedule_changed(function(e)
+  LOG("ON_TRAIN_SCHEDULE_CHANGED: [" .. e.train.id .. "]")
   -- Only update if a player intentionally changed something
   if e.player_index then
-    LOG("SCHEDULE CHANGED")
     groups.update_group_schedule(e.train)
   end
 end)
