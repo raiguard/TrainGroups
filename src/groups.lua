@@ -153,7 +153,11 @@ function groups.migrate_trains(train, old_id_1, old_id_2)
       if
         not added
         and group_data
-        and (not schedule or not group_data.schedule or table.deep_compare(schedule.records, group_data.schedule))
+        and (
+          not schedule
+          or not group_data.schedule
+          or table.deep_compare(sanitize_records(schedule.records), group_data.schedule)
+        )
       then
         added = true
         groups.add_train(train, train_data.group)
