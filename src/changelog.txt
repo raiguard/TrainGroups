@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.7
 Date: ????
-  Features:
+  Bugfixes:
+    - Fixed a crash when playing with Space Exploration 0.5 or earlier (https://todo.sr.ht/~raiguard/factorio-mods/72)
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.6
 Date: 2022-08-11

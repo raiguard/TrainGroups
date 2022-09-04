@@ -21,7 +21,10 @@ end
 --- @field teleporter LuaEntity
 
 local function on_se_elevator()
-  if script.active_mods["space-exploration"] then
+  if
+    script.active_mods["space-exploration"]
+    and remote.interfaces["space-exploration"]["get_on_train_teleport_started_event"]
+  then
     event.register(
       remote.call("space-exploration", "get_on_train_teleport_started_event"),
       --- @param e on_train_teleported
