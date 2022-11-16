@@ -1,9 +1,9 @@
-local event = require("__flib__.event")
-local migration = require("__flib__.migration")
-local gui_util = require("__flib__.gui")
+local event = require("__flib__/event")
+local migration = require("__flib__/migration")
+local gui_util = require("__flib__/gui")
 
-local gui = require("gui")
-local groups = require("groups")
+local gui = require("__TrainGroups__/gui")
+local groups = require("__TrainGroups__/groups")
 
 DEBUG = false
 function LOG(msg)
@@ -254,7 +254,7 @@ event.on_entity_settings_pasted(function(e)
   end
 end)
 
-local reverse_defines = require("__flib__.reverse-defines")
+local reverse_defines = require("__flib__/reverse-defines")
 
 event.register({
   defines.events.on_player_mined_entity,

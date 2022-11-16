@@ -1,8 +1,8 @@
-local gui_util = require("__flib__.gui")
-local train_util = require("__flib__.train")
-local table = require("__flib__.table")
+local gui_util = require("__flib__/gui")
+local train_util = require("__flib__/train")
+local table = require("__flib__/table")
 
-local groups = require("groups")
+local groups = require("__TrainGroups__/groups")
 
 --- @param train LuaTrain
 --- @return LocalisedString[] items
