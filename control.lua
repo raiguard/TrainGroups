@@ -51,7 +51,7 @@ local function on_se_elevator()
   end
 end
 
--- BOOTSTRAP
+gui.handle_events()
 
 event.on_init(function()
   on_se_elevator()
@@ -115,24 +115,12 @@ event.on_configuration_changed(function(e)
         train_data.updating_schedule = nil
       end
     end,
+    -- TODO: Migrate GUI element name
   })
 end)
 
 event.on_force_created(function(e)
   groups.init_force(e.force)
-end)
-
--- GUI
-
-gui_util.hook_events(function(e)
-  local action = gui_util.read_action(e)
-  if action then
-    local player = game.get_player(e.player_index)
-    -- We probably don't need all of these checks here, but you can't be too safe
-    if player.opened_gui_type == defines.gui_type.entity and player.opened and player.opened.type == "locomotive" then
-      gui[action](e.element, player.opened.train)
-    end
-  end
 end)
 
 event.on_gui_opened(function(e)

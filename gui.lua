@@ -1,4 +1,4 @@
-local gui_util = require("__flib__/gui")
+local gui_util = require("__flib__/gui-lite")
 local train_util = require("__flib__/train")
 local table = require("__flib__/table")
 
@@ -6,7 +6,7 @@ local groups = require("__TrainGroups__/groups")
 
 --- @param train LuaTrain
 --- @return LocalisedString[] items
---- @return number selected_index
+--- @return uint selected_index
 local function get_dropdown_items(train)
   local locomotive = train_util.get_main_locomotive(train)
   if not locomotive then
@@ -37,29 +37,23 @@ local function get_dropdown_items(train)
   end
   table.insert(dropdown_items, { "gui.tgps-create-group" })
 
-  return dropdown_items, selected
+  return dropdown_items, selected --[[@as uint]]
 end
 
 local gui = {}
-
-function gui.init()
-  global.guis = {}
-end
 
 --- @param player LuaPlayer
 --- @param train LuaTrain
 function gui.build(player, train)
   -- Just in case
-  if player.gui.relative["tgps-window"] then
-    gui.destroy(player)
-  end
+  gui.destroy(player)
 
   local dropdown_items, selected = get_dropdown_items(train)
 
-  gui_util.build(player.gui.relative, {
+  gui_util.add(player.gui.relative, {
     {
       type = "frame",
-      name = "tgps-window",
+      name = "tgps_window",
       style = "quick_bar_window_frame",
       -- Relative GUI will stretch top frames by default for some reason
       style_mods = {
@@ -74,8 +68,8 @@ function gui.build(player, train)
           name = "dropdown",
           items = dropdown_items,
           selected_index = selected,
-          actions = {
-            on_selection_state_changed = "handle_dropdown_selection",
+          handler = {
+            [defines.events.on_gui_selection_state_changed] = gui.on_dropdown_selection,
           },
         },
         {
@@ -85,17 +79,17 @@ function gui.build(player, train)
           sprite = "utility/rename_icon_normal",
           tooltip = { "gui.tgps-rename-group" },
           visible = selected > 1,
-          actions = {
-            on_click = "toggle_rename_group",
+          handler = {
+            [defines.events.on_gui_click] = gui.toggle_rename_group,
           },
         },
         {
           type = "textfield",
           name = "textfield",
           visible = false,
-          actions = {
-            on_confirmed = "handle_confirmed",
-            on_text_changed = "update_textfield_style",
+          handler = {
+            [defines.events.on_gui_confirmed] = gui.on_confirmed,
+            [defines.events.on_gui_text_changed] = gui.update_textfield_style,
           },
         },
         {
@@ -107,8 +101,8 @@ function gui.build(player, train)
           elem_type = "signal",
           signal = { type = "virtual", name = "tgps-signal-icon-selector" },
           visible = false,
-          actions = {
-            on_elem_changed = "add_icon",
+          handler = {
+            [defines.events.on_gui_elem_changed] = gui.add_icon,
           },
         },
         {
@@ -118,8 +112,8 @@ function gui.build(player, train)
           style_mods = { top_margin = 0 },
           sprite = "utility/check_mark",
           visible = false,
-          actions = {
-            on_click = "handle_confirmed",
+          handler = {
+            [defines.events.on_gui_click] = gui.on_confirmed,
           },
         },
       },
@@ -129,17 +123,15 @@ end
 
 --- @param player LuaPlayer
 function gui.destroy(player)
-  local window = player.gui.relative["tgps-window"]
+  local window = player.gui.relative.tgps_window
   if window and window.valid then
     window.destroy()
   end
 end
 
--- EVENT HANDLERS
-
 --- @param elem LuaGuiElement
 --- @param train LuaTrain
-function gui.handle_dropdown_selection(elem, train)
+function gui.on_dropdown_selection(elem, train)
   -- Show or hide group creation
   if elem.selected_index == #elem.items then
     elem.parent.rename_button.visible = false --- @diagnostic disable-line
@@ -181,7 +173,7 @@ end
 
 --- @param elem LuaGuiElement
 --- @param train LuaTrain
-function gui.handle_confirmed(elem, train)
+function gui.on_confirmed(elem, train)
   local group_name = elem.parent.textfield.text --- @diagnostic disable-line
   if #group_name == 0 then
     return
@@ -241,14 +233,15 @@ end
 
 --- @param selector LuaGuiElement
 function gui.add_icon(selector, _)
-  --- @type SignalID
   local value = selector.elem_value
+  if not value then
+    return
+  end
   local type = value.type
   if type == "virtual" then
     type = "virtual-signal"
   end
-  --- @type LuaGuiElement
-  local textfield = selector.parent.textfield --- @diagnostic disable-line
+  local textfield = selector.parent.textfield --[[@as LuaGuiElement]]
   -- We can't read the cursor position, so just stick it at the end
   textfield.text = textfield.text .. "[" .. type .. "=" .. value.name .. "]"
 
@@ -278,5 +271,17 @@ function gui.toggle_rename_group(rename_button, train)
     rename_button.parent.confirm_button.visible = true --- @diagnostic disable-line
   end
 end
+
+gui_util.add_handlers(gui, function(e, handler)
+  local elem = e.element
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+  local opened = player.opened
+
+  if player.opened_gui_type == defines.gui_type.entity and opened and opened.type == "locomotive" then
+    handler(elem, opened.train --[[@as LuaTrain]])
+  end
+end)
+
+gui.handle_events = gui_util.handle_events
 
 return gui
