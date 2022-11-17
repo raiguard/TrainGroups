@@ -56,9 +56,7 @@ function gui.build(player, train)
       name = "tgps_window",
       style = "quick_bar_window_frame",
       -- Relative GUI will stretch top frames by default for some reason
-      style_mods = {
-        horizontally_stretchable = false,
-      },
+      style_mods = { horizontally_stretchable = false },
       anchor = { gui = defines.relative_gui_type.train_gui, position = defines.relative_gui_position.top },
       {
         type = "frame",
@@ -134,29 +132,29 @@ end
 function gui.on_dropdown_selection(elem, train)
   -- Show or hide group creation
   if elem.selected_index == #elem.items then
-    elem.parent.rename_button.visible = false --- @diagnostic disable-line
-    elem.parent.textfield.visible = true --- @diagnostic disable-line
-    elem.parent.textfield.text = "" --- @diagnostic disable-line
-    elem.parent.textfield.focus() --- @diagnostic disable-line
-    gui.update_textfield_style(elem.parent.textfield) --- @diagnostic disable-line
-    elem.parent.icon_selector.visible = true --- @diagnostic disable-line
-    elem.parent.confirm_button.visible = true --- @diagnostic disable-line
+    elem.parent.rename_button.visible = false
+    elem.parent.textfield.visible = true
+    elem.parent.textfield.text = ""
+    elem.parent.textfield.focus()
+    gui.update_textfield_style(elem.parent.textfield)
+    elem.parent.icon_selector.visible = true
+    elem.parent.confirm_button.visible = true
     return
   else
-    elem.parent.rename_button.visible = true --- @diagnostic disable-line
-    elem.parent.rename_button.style = "tool_button" --- @diagnostic disable-line
-    elem.parent.textfield.visible = false --- @diagnostic disable-line
-    elem.parent.icon_selector.visible = false --- @diagnostic disable-line
-    elem.parent.confirm_button.visible = false --- @diagnostic disable-line
+    elem.parent.rename_button.visible = true
+    elem.parent.rename_button.style = "tool_button"
+    elem.parent.textfield.visible = false
+    elem.parent.icon_selector.visible = false
+    elem.parent.confirm_button.visible = false
     elem.parent.focus()
   end
 
   if elem.selected_index == 1 then
-    elem.parent.rename_button.visible = false --- @diagnostic disable-line
+    elem.parent.rename_button.visible = false
   end
 
   -- Change group
-  local group_name = elem.items[elem.selected_index][2]
+  local group_name = elem.items[elem.selected_index][2] --[[@as string]]
   local train_data = global.trains[train.id]
   if train_data then
     if elem.selected_index > 1 then
@@ -168,13 +166,13 @@ function gui.on_dropdown_selection(elem, train)
     groups.add_train(train, group_name)
   end
 
-  gui.refresh_dropdown(elem.parent.dropdown, train) --- @diagnostic disable-line
+  gui.refresh_dropdown(elem.parent.dropdown, train)
 end
 
 --- @param elem LuaGuiElement
 --- @param train LuaTrain
 function gui.on_confirmed(elem, train)
-  local group_name = elem.parent.textfield.text --- @diagnostic disable-line
+  local group_name = elem.parent.textfield.text --[[@as string]]
   if #group_name == 0 then
     return
   end
@@ -183,7 +181,7 @@ function gui.on_confirmed(elem, train)
 
   -- Don't allow overwriting an existing group
   if global.groups[force_index][group_name] then
-    local player = game.get_player(elem.player_index)
+    local player = game.get_player(elem.player_index --[[@as uint]]) --[[@as LuaPlayer]]
     player.create_local_flying_text({
       text = { "gui.tgps-group-exists", group_name },
       create_at_cursor = true,
@@ -194,8 +192,8 @@ function gui.on_confirmed(elem, train)
 
   local train_data = global.trains[train.id]
   if train_data then
-    local rename_button = elem.parent.rename_button --- @diagnostic disable-line
-    local is_renaming = rename_button.visible and rename_button.style.name == "flib_selected_tool_button" --- @diagnostic disable-line
+    local rename_button = elem.parent.rename_button --[[@as LuaGuiElement]]
+    local is_renaming = rename_button.visible and rename_button.style.name == "flib_selected_tool_button"
     if is_renaming then
       groups.rename_group(force_index, train_data.group, group_name)
     else
@@ -205,13 +203,13 @@ function gui.on_confirmed(elem, train)
     groups.add_train(train, group_name)
   end
 
-  elem.parent.rename_button.visible = true --- @diagnostic disable-line
-  elem.parent.rename_button.style = "tool_button" --- @diagnostic disable-line
-  elem.parent.textfield.visible = false --- @diagnostic disable-line
-  elem.parent.icon_selector.visible = false --- @diagnostic disable-line
-  elem.parent.confirm_button.visible = false --- @diagnostic disable-line
+  elem.parent.rename_button.visible = true
+  elem.parent.rename_button.style = "tool_button"
+  elem.parent.textfield.visible = false
+  elem.parent.icon_selector.visible = false
+  elem.parent.confirm_button.visible = false
 
-  gui.refresh_dropdown(elem.parent.dropdown, train) --- @diagnostic disable-line
+  gui.refresh_dropdown(elem.parent.dropdown, train)
 end
 
 --- @param dropdown LuaGuiElement
@@ -258,17 +256,17 @@ function gui.toggle_rename_group(rename_button, train)
   local train_data = global.trains[train.id]
   if rename_button.style.name == "flib_selected_tool_button" then
     rename_button.style = "tool_button"
-    rename_button.parent.textfield.visible = false --- @diagnostic disable-line
-    rename_button.parent.icon_selector.visible = false --- @diagnostic disable-line
-    rename_button.parent.confirm_button.visible = false --- @diagnostic disable-line
+    rename_button.parent.textfield.visible = false
+    rename_button.parent.icon_selector.visible = false
+    rename_button.parent.confirm_button.visible = false
   elseif train_data then
     rename_button.style = "flib_selected_tool_button"
-    rename_button.parent.textfield.text = train_data.group --- @diagnostic disable-line
-    rename_button.parent.textfield.visible = true --- @diagnostic disable-line
-    rename_button.parent.textfield.select_all() --- @diagnostic disable-line
-    rename_button.parent.textfield.focus() --- @diagnostic disable-line
-    rename_button.parent.icon_selector.visible = true --- @diagnostic disable-line
-    rename_button.parent.confirm_button.visible = true --- @diagnostic disable-line
+    rename_button.parent.textfield.text = train_data.group
+    rename_button.parent.textfield.visible = true
+    rename_button.parent.textfield.select_all()
+    rename_button.parent.textfield.focus()
+    rename_button.parent.icon_selector.visible = true
+    rename_button.parent.confirm_button.visible = true
   end
 end
 
