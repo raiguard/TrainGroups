@@ -1,4 +1,3 @@
-local event = require("__flib__/event")
 local migration = require("__flib__/migration")
 
 local gui = require("__TrainGroups__/gui")
@@ -22,7 +21,7 @@ local function on_se_elevator()
     script.active_mods["space-exploration"]
     and remote.interfaces["space-exploration"]["get_on_train_teleport_started_event"]
   then
-    event.register(
+    script.on_event(
       remote.call("space-exploration", "get_on_train_teleport_started_event"),
       --- @param e on_train_teleported
       function(e)
@@ -34,7 +33,7 @@ local function on_se_elevator()
         end
       end
     )
-    event.register(
+    script.on_event(
       remote.call("space-exploration", "get_on_train_teleport_finished_event"),
       --- @param e on_train_teleported
       function(e)
@@ -50,7 +49,7 @@ end
 
 gui.handle_events()
 
-event.on_init(function()
+script.on_init(function()
   on_se_elevator()
 
   groups.init()
@@ -60,11 +59,11 @@ event.on_init(function()
   end
 end)
 
-event.on_load(function()
+script.on_load(function()
   on_se_elevator()
 end)
 
-event.on_configuration_changed(function(e)
+script.on_configuration_changed(function(e)
   migration.on_config_changed(e, {
     ["1.0.4"] = function()
       global.to_delete = {}
@@ -124,18 +123,18 @@ event.on_configuration_changed(function(e)
   })
 end)
 
-event.on_force_created(function(e)
+script.on_event(defines.events.on_force_created, function(e)
   groups.init_force(e.force)
 end)
 
-event.on_gui_opened(function(e)
+script.on_event(defines.events.on_gui_opened, function(e)
   if e.gui_type == defines.gui_type.entity and e.entity and e.entity.type == "locomotive" then
     local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
     gui.build(player, e.entity.train)
   end
 end)
 
-event.on_gui_closed(function(e)
+script.on_event(defines.events.on_gui_closed, function(e)
   if e.gui_type == defines.gui_type.entity and e.entity and e.entity.type == "locomotive" then
     local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
     gui.destroy(player)
@@ -150,7 +149,7 @@ local rolling_stock_types = {
   ["fluid-wagon"] = true,
   ["artillery-wagon"] = true,
 }
-event.on_player_setup_blueprint(function(e)
+script.on_event(defines.events.on_player_setup_blueprint, function(e)
   local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
 
   -- Get blueprint
@@ -199,7 +198,7 @@ event.on_player_setup_blueprint(function(e)
   end
 end)
 
-event.register({
+script.on_event({
   defines.events.on_built_entity,
   defines.events.on_robot_built_entity,
   defines.events.on_entity_cloned,
@@ -219,7 +218,7 @@ event.register({
   groups.add_train(entity.train, tags.train_group --[[@as string?]])
 end, { { filter = "rolling-stock" } })
 
-event.on_pre_entity_settings_pasted(function(e)
+script.on_event(defines.events.on_pre_entity_settings_pasted, function(e)
   if e.source.type == "locomotive" and e.destination.type == "locomotive" then
     local destination_train = e.destination.train --[[@as LuaTrain]]
     local destination_train_data = global.trains[destination_train.id]
@@ -230,7 +229,7 @@ event.on_pre_entity_settings_pasted(function(e)
   end
 end)
 
-event.on_entity_settings_pasted(function(e)
+script.on_event(defines.events.on_entity_settings_pasted, function(e)
   local source = e.source
   local destination = e.destination
 
@@ -254,7 +253,7 @@ end)
 
 local reverse_defines = require("__flib__/reverse-defines")
 
-event.register({
+script.on_event({
   defines.events.on_player_mined_entity,
   defines.events.on_robot_mined_entity,
   defines.events.on_entity_died,
@@ -275,13 +274,13 @@ end, { { filter = "rolling-stock" } })
 
 -- TRAIN
 
-event.on_train_created(function(e)
+script.on_event(defines.events.on_train_created, function(e)
   if e.old_train_id_1 or e.old_train_id_2 then
     groups.migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
   end
 end)
 
-event.on_train_schedule_changed(function(e)
+script.on_event(defines.events.on_train_schedule_changed, function(e)
   LOG("ON_TRAIN_SCHEDULE_CHANGED: [" .. e.train.id .. "]")
   -- Only update if a player intentionally changed something
   if e.player_index then
@@ -289,7 +288,7 @@ event.on_train_schedule_changed(function(e)
   end
 end)
 
-event.on_tick(function()
+script.on_event(defines.events.on_tick, function()
   for train_id in pairs(global.to_delete) do
     local train_data = global.trains[train_id]
     if train_data then
