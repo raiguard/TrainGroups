@@ -1,6 +1,5 @@
 local event = require("__flib__/event")
 local migration = require("__flib__/migration")
-local gui_util = require("__flib__/gui")
 
 local gui = require("__TrainGroups__/gui")
 local groups = require("__TrainGroups__/groups")
@@ -11,8 +10,6 @@ function LOG(msg)
     log({ "", "[" .. game.tick .. "] ", msg })
   end
 end
-
--- SPACE EXPLORATION
 
 --- @class on_train_teleported
 --- @field train LuaTrain
@@ -115,7 +112,15 @@ event.on_configuration_changed(function(e)
         train_data.updating_schedule = nil
       end
     end,
-    -- TODO: Migrate GUI element name
+    ["2.0.0"] = function()
+      -- Destroy old GUIs (name was changed)
+      for _, player in pairs(game.players) do
+        local window = player.gui.relative["tgps-window"]
+        if window and window.valid then
+          window.destroy()
+        end
+      end
+    end,
   })
 end)
 
@@ -125,13 +130,15 @@ end)
 
 event.on_gui_opened(function(e)
   if e.gui_type == defines.gui_type.entity and e.entity and e.entity.type == "locomotive" then
-    gui.build(game.get_player(e.player_index), e.entity.train)
+    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+    gui.build(player, e.entity.train)
   end
 end)
 
 event.on_gui_closed(function(e)
   if e.gui_type == defines.gui_type.entity and e.entity and e.entity.type == "locomotive" then
-    gui.destroy(game.get_player(e.player_index))
+    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+    gui.destroy(player)
   end
 end)
 
@@ -144,12 +151,15 @@ local rolling_stock_types = {
   ["artillery-wagon"] = true,
 }
 event.on_player_setup_blueprint(function(e)
-  local player = game.get_player(e.player_index)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
 
   -- Get blueprint
   local bp = player.blueprint_to_setup
   if not bp or not bp.valid_for_read then
     bp = player.cursor_stack
+    if not bp then
+      return
+    end
     if bp.type == "blueprint-book" then
       local item_inventory = bp.get_inventory(defines.inventory.item_main)
       if item_inventory then
@@ -206,12 +216,12 @@ event.register({
     return
   end
 
-  groups.add_train(entity.train, tags.train_group)
+  groups.add_train(entity.train, tags.train_group --[[@as string?]])
 end, { { filter = "rolling-stock" } })
 
 event.on_pre_entity_settings_pasted(function(e)
   if e.source.type == "locomotive" and e.destination.type == "locomotive" then
-    local destination_train = e.destination.train
+    local destination_train = e.destination.train --[[@as LuaTrain]]
     local destination_train_data = global.trains[destination_train.id]
     if destination_train_data then
       -- Add a flag to ignore the schedule change for the destination train
@@ -226,8 +236,8 @@ event.on_entity_settings_pasted(function(e)
 
   if source.type == "locomotive" and destination.type == "locomotive" then
     LOG("SETTINGS PASTED")
-    local source_train = source.train
-    local destination_train = destination.train
+    local source_train = source.train --[[@as LuaTrain]]
+    local destination_train = destination.train --[[@as LuaTrain]]
     local source_train_data = global.trains[source_train.id]
     local destination_train_data = global.trains[destination_train.id]
 
@@ -250,7 +260,7 @@ event.register({
   defines.events.on_entity_died,
   defines.events.script_raised_destroy,
 }, function(e)
-  local train = e.entity.train
+  local train = e.entity.train --[[@as LuaTrain]]
   LOG(string.upper(reverse_defines.events[e.name]) .. ": [" .. train.id .. "]")
   local train_data = global.trains[train.id]
   if not train_data then
