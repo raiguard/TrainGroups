@@ -17,6 +17,7 @@ local tss_signal_names = {
   "[virtual-signal=train-schedule-input-signal]",
   "[virtual-signal=refuel-signal]", -- This is actually from TCS, but TSS uses it if present
 }
+local tcs_present = script.active_mods["Train_Control_Signals"]
 local tss_present = script.active_mods["TrainScheduleSignals"]
 --- Remove temporary stations, remove Train Control Signals skip signal, and remove wait conditions if
 --- they are being managed by Train Schedule Signals
@@ -27,8 +28,10 @@ local function sanitize_records(records)
     local station_name = record.station
     if station_name then
       -- Remove TCS skip signal if present
-      station_name = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
-      record.station = station_name
+      if tcs_present then
+        station_name = string.gsub(record.station, "%[virtual%-signal=skip%-signal%]", "")
+        record.station = station_name
+      end
       -- Remove wait conditions if TSS is being used
       if tss_present then
         for _, signal in pairs(tss_signal_names) do
