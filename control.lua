@@ -1,4 +1,6 @@
 local migration = require("__flib__/migration")
+local table = require("__flib__/table")
+
 
 local gui = require("__TrainGroups__/gui")
 local groups = require("__TrainGroups__/groups")
@@ -47,6 +49,15 @@ local function on_se_elevator()
   end
 end
 
+local rolling_stock_filter = { { filter = "rolling-stock" } }
+
+local rolling_stock_types = {
+  ["locomotive"] = true,
+  ["cargo-wagon"] = true,
+  ["fluid-wagon"] = true,
+  ["artillery-wagon"] = true,
+}
+
 gui.handle_events()
 
 script.on_init(function()
@@ -63,65 +74,63 @@ script.on_load(function()
   on_se_elevator()
 end)
 
-script.on_configuration_changed(function(e)
-  migration.on_config_changed(e, {
-    ["1.0.4"] = function()
-      global.to_delete = {}
-    end,
-    ["1.1.2"] = function()
-      -- Convert train lists to a hashmap
-      for _, force_groups in pairs(global.groups) do
-        for _, group in pairs(force_groups) do
-          local new = {}
-          for _, train_id in pairs(group.trains) do
-            local train_data = global.trains[train_id]
-            if train_data then
-              new[train_id] = train_data
-            end
-          end
-          group.trains = new
-        end
-      end
-    end,
-    ["1.1.5"] = function()
-      local new_groups = {}
-      for force_index, force_groups in pairs(global.groups) do
-        new_groups[force_index] = {}
-        for name, group in pairs(force_groups) do
-          local new_trains = {}
-          -- Verify that each train belongs to this group
-          for train_id, train_data in pairs(group.trains) do
-            if train_data.group == name then
-              new_trains[train_id] = train_data
-            end
-          end
-          group.trains = new_trains
-          -- Cull any groups that have no trains
-          if table_size(new_trains) > 0 then
-            new_groups[force_index][name] = group
+migration.handle_on_configuration_changed(nil, {
+  ["1.0.4"] = function()
+    global.to_delete = {}
+  end,
+  ["1.1.2"] = function()
+    -- Convert train lists to a hashmap
+    for _, force_groups in pairs(global.groups) do
+      for _, group in pairs(force_groups) do
+        local new = {}
+        for _, train_id in pairs(group.trains) do
+          local train_data = global.trains[train_id]
+          if train_data then
+            new[train_id] = train_data
           end
         end
+        group.trains = new
       end
-      global.groups = new_groups
-    end,
-    ["1.1.6"] = function()
-      -- updating_schedule was changed to ignore_schedule
-      for _, train_data in pairs(global.trains) do
-        train_data.ignore_schedule = false
-        train_data.updating_schedule = nil
-      end
-    end,
-    ["2.0.0"] = function()
-      -- Destroy old GUIs (name was changed)
-      for _, player in pairs(game.players) do
-        local window = player.gui.relative["tgps-window"]
-        if window and window.valid then
-          window.destroy()
+    end
+  end,
+  ["1.1.5"] = function()
+    local new_groups = {}
+    for force_index, force_groups in pairs(global.groups) do
+      new_groups[force_index] = {}
+      for name, group in pairs(force_groups) do
+        local new_trains = {}
+        -- Verify that each train belongs to this group
+        for train_id, train_data in pairs(group.trains) do
+          if train_data.group == name then
+            new_trains[train_id] = train_data
+          end
+        end
+        group.trains = new_trains
+        -- Cull any groups that have no trains
+        if table_size(new_trains) > 0 then
+          new_groups[force_index][name] = group
         end
       end
-    end,
-  })
-end)
+    end
+    global.groups = new_groups
+  end,
+  ["1.1.6"] = function()
+    -- updating_schedule was changed to ignore_schedule
+    for _, train_data in pairs(global.trains) do
+      train_data.ignore_schedule = false
+      train_data.updating_schedule = nil
+    end
+  end,
+  ["2.0.0"] = function()
+    -- Destroy old GUIs (name was changed)
+    for _, player in pairs(game.players) do
+      local window = player.gui.relative["tgps-window"]
+      if window and window.valid then
+        window.destroy()
+      end
+    end
+  end,
+})
 
 script.on_event(defines.events.on_force_created, function(e)
   groups.init_force(e.force)
@@ -141,14 +150,6 @@ script.on_event(defines.events.on_gui_closed, function(e)
   end
 end)
 
--- INTERACTION
-
-local rolling_stock_types = {
-  ["locomotive"] = true,
-  ["cargo-wagon"] = true,
-  ["fluid-wagon"] = true,
-  ["artillery-wagon"] = true,
-}
 script.on_event(defines.events.on_player_setup_blueprint, function(e)
   local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
 
@@ -198,13 +199,8 @@ script.on_event(defines.events.on_player_setup_blueprint, function(e)
   end
 end)
 
-script.on_event({
-  defines.events.on_built_entity,
-  defines.events.on_robot_built_entity,
-  defines.events.on_entity_cloned,
-  defines.events.script_raised_built,
-  defines.events.script_raised_revive,
-}, function(e)
+--- @param e on_built_entity|on_robot_built_entity|on_entity_cloned|script_raised_built|script_raised_revive
+local function on_built(e)
   local tags = e.tags
   if not tags or not tags.train_group then
     return
@@ -216,7 +212,12 @@ script.on_event({
   end
 
   groups.add_train(entity.train, tags.train_group --[[@as string?]])
-end, { { filter = "rolling-stock" } })
+end
+script.on_event(defines.events.on_built_entity, on_built, rolling_stock_filter)
+script.on_event(defines.events.on_robot_built_entity, on_built, rolling_stock_filter)
+script.on_event(defines.events.on_entity_cloned, on_built, rolling_stock_filter)
+script.on_event(defines.events.script_raised_built, on_built, rolling_stock_filter)
+script.on_event(defines.events.script_raised_revive, on_built, rolling_stock_filter)
 
 script.on_event(defines.events.on_pre_entity_settings_pasted, function(e)
   if e.source.type == "locomotive" and e.destination.type == "locomotive" then
@@ -251,28 +252,23 @@ script.on_event(defines.events.on_entity_settings_pasted, function(e)
   end
 end)
 
-local reverse_defines = require("__flib__/reverse-defines")
-
-script.on_event({
-  defines.events.on_player_mined_entity,
-  defines.events.on_robot_mined_entity,
-  defines.events.on_entity_died,
-  defines.events.script_raised_destroy,
-}, function(e)
+--- @param e on_player_mined_entity|on_robot_mined_entity|on_entity_died|script_raised_destroy
+local function on_destroyed(e)
   local train = e.entity.train --[[@as LuaTrain]]
-  LOG(string.upper(reverse_defines.events[e.name]) .. ": [" .. train.id .. "]")
+  LOG(string.upper(table.find(defines.events, e.name)) .. ": [" .. train.id .. "]")
   local train_data = global.trains[train.id]
   if not train_data then
     return
   end
-
   -- If this is the last rolling stock in the train
   if #train.carriages == 1 then
     groups.remove_train(train_data)
   end
-end, { { filter = "rolling-stock" } })
-
--- TRAIN
+end
+script.on_event(defines.events.on_player_mined_entity, on_destroyed, rolling_stock_filter)
+script.on_event(defines.events.on_robot_mined_entity, on_destroyed, rolling_stock_filter)
+script.on_event(defines.events.on_entity_died, on_destroyed, rolling_stock_filter)
+script.on_event(defines.events.script_raised_destroy, on_destroyed, rolling_stock_filter)
 
 script.on_event(defines.events.on_train_created, function(e)
   if e.old_train_id_1 or e.old_train_id_2 then
