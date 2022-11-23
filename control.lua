@@ -1,11 +1,13 @@
+local gui = require("__flib__/gui-lite")
 local migration = require("__flib__/migration")
 local table = require("__flib__/table")
 
-
-local gui = require("__TrainGroups__/gui")
 local groups = require("__TrainGroups__/groups")
+local relative_gui = require("__TrainGroups__/relative-gui")
+local select_group_gui = require("__TrainGroups__/select-group-gui")
+local util = require("__TrainGroups__/util")
 
-DEBUG = false
+DEBUG = true
 function LOG(msg)
   if __DebugAdapter or DEBUG then
     log({ "", "[" .. game.tick .. "] ", msg })
@@ -64,6 +66,8 @@ script.on_init(function()
   on_se_elevator()
 
   groups.init()
+  relative_gui.init()
+  select_group_gui.init()
 
   for _, force in pairs(game.forces) do
     groups.init_force(force)
@@ -137,16 +141,23 @@ script.on_event(defines.events.on_force_created, function(e)
 end)
 
 script.on_event(defines.events.on_gui_opened, function(e)
-  if e.gui_type == defines.gui_type.entity and e.entity and e.entity.type == "locomotive" then
-    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-    gui.build(player, e.entity.train)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+  local train = util.get_open_train(player)
+  if train then
+    relative_gui.build(player, train)
   end
 end)
 
 script.on_event(defines.events.on_gui_closed, function(e)
-  if e.gui_type == defines.gui_type.entity and e.entity and e.entity.type == "locomotive" then
-    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-    gui.destroy(player)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+  local gui = util.get_relative_gui(player)
+  if gui then
+    relative_gui.destroy(gui)
+  end
+  local gui = util.get_select_group_gui(player)
+  if gui then
+    select_group_gui.destroy(gui)
+    player.opened = e.entity
   end
 end)
 
