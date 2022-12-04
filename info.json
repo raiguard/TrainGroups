@@ -7,5 +7,5 @@
   "homepage": "https://sr.ht/~raiguard/factorio-mods",
   "description": "Trains assigned to the same group will have the same schedule. Includes support for Train Control Signals.",
   "factorio_version": "1.1",
-  "dependencies": ["base >= 1.1.72", "flib >= 0.12.0", "? Train_Control_Signals"]
+  "dependencies": ["base >= 1.1.74", "flib >= 0.12.0", "? Train_Control_Signals"]
 }

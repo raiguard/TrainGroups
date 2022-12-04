@@ -159,6 +159,19 @@ function groups.rename_group(force_index, current_name, new_name)
   end
 end
 
+--- @param force_index number
+--- @param group string
+function groups.remove_group(force_index, group)
+  local group_data = global.groups[force_index][group]
+  if not group_data then
+    return
+  end
+
+  for _, train_data in pairs(group_data.trains) do
+    groups.remove_train(train_data)
+  end
+end
+
 --- @param train LuaTrain
 --- @param old_id_1 uint?
 --- @param old_id_2 uint?

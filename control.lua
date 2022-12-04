@@ -2,9 +2,9 @@ local gui = require("__flib__/gui-lite")
 local migration = require("__flib__/migration")
 local table = require("__flib__/table")
 
+local change_group_gui = require("__TrainGroups__/change-group-gui")
 local groups = require("__TrainGroups__/groups")
 local relative_gui = require("__TrainGroups__/relative-gui")
-local select_group_gui = require("__TrainGroups__/select-group-gui")
 local util = require("__TrainGroups__/util")
 
 DEBUG = true
@@ -66,8 +66,8 @@ script.on_init(function()
   on_se_elevator()
 
   groups.init()
+  change_group_gui.init()
   relative_gui.init()
-  select_group_gui.init()
 
   for _, force in pairs(game.forces) do
     groups.init_force(force)
@@ -78,11 +78,11 @@ script.on_load(function()
   on_se_elevator()
 end)
 
-migration.handle_on_configuration_changed(nil, {
+migration.handle_on_configuration_changed({
   ["1.0.4"] = function()
     global.to_delete = {}
   end,
-  ["1.1.2"] = function()
+  ["1.1.3"] = function()
     -- Convert train lists to a hashmap
     for _, force_groups in pairs(global.groups) do
       for _, group in pairs(force_groups) do
@@ -133,6 +133,9 @@ migration.handle_on_configuration_changed(nil, {
         window.destroy()
       end
     end
+    -- Init new GUIs
+    relative_gui.init()
+    change_group_gui.init()
   end,
 })
 
@@ -154,9 +157,9 @@ script.on_event(defines.events.on_gui_closed, function(e)
   if gui then
     relative_gui.destroy(gui)
   end
-  local gui = util.get_select_group_gui(player)
+  local gui = util.get_change_group_gui(player)
   if gui then
-    select_group_gui.destroy(gui)
+    change_group_gui.destroy(gui)
     player.opened = e.entity
   end
 end)

@@ -1,6 +1,6 @@
-local gui_util = require("__flib__/gui-lite")
+local flib_gui = require("__flib__/gui-lite")
 
-local select_group_gui = require("__TrainGroups__/select-group-gui")
+local change_group_gui = require("__TrainGroups__/change-group-gui")
 local util = require("__TrainGroups__/util")
 
 --- @class RelativeGuiElems
@@ -17,7 +17,7 @@ end
 --- @param train LuaTrain
 function gui.build(player, train)
   --- @type RelativeGuiElems
-  local elems = gui_util.add(player.gui.relative, {
+  local elems = flib_gui.add(player.gui.relative, {
     {
       type = "frame",
       name = "tgps_relative_window",
@@ -32,9 +32,8 @@ function gui.build(player, train)
           type = "button",
           name = "relative_button",
           style = "tgps_relative_group_button",
-          handler = {
-            [defines.events.on_gui_click] = gui.open_select_group,
-          },
+          tooltip = { "gui.tgps-change-train-group" },
+          handler = { [defines.events.on_gui_click] = gui.open_select_group },
         },
       },
     },
@@ -76,23 +75,20 @@ end
 
 --- @param self RelativeGui
 function gui.open_select_group(self)
-  local sg_gui = util.get_select_group_gui(self.player)
+  local sg_gui = util.get_change_group_gui(self.player)
   if sg_gui then
     sg_gui.elems.tgps_select_group_window.bring_to_front()
   else
-    select_group_gui.build(self.player, self.train)
+    change_group_gui.build(self.player, self.train)
   end
 end
 
-gui_util.add_handlers(
-  { relative_open_select_group = gui.open_select_group, relative_update_caption = gui.update_caption },
-  function(e, handler)
-    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-    local self = util.get_relative_gui(player)
-    if self then
-      handler(self)
-    end
+util.add_gui_handlers(gui, "relative", function(e, handler)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+  local self = util.get_relative_gui(player)
+  if self then
+    handler(self)
   end
-)
+end)
 
 return gui
