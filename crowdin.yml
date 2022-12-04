@@ -7,4 +7,3 @@ files:
     dest: TrainGroups/TrainGroups.ini
     translation: /locale/%two_letters_code%/%original_file_name%
     type: ini
-    update_option: update_as_unapproved
