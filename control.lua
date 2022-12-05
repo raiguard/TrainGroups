@@ -213,7 +213,7 @@ script.on_event(defines.events.on_player_setup_blueprint, function(e)
   end
 end)
 
---- @param e on_built_entity|on_robot_built_entity|on_entity_cloned|script_raised_built|script_raised_revive
+--- @param e on_built_entity|on_robot_built_entity|script_raised_built|script_raised_revive
 local function on_built(e)
   local tags = e.tags
   if not tags or not tags.train_group then
@@ -229,9 +229,29 @@ local function on_built(e)
 end
 script.on_event(defines.events.on_built_entity, on_built, rolling_stock_filter)
 script.on_event(defines.events.on_robot_built_entity, on_built, rolling_stock_filter)
-script.on_event(defines.events.on_entity_cloned, on_built, rolling_stock_filter)
 script.on_event(defines.events.script_raised_built, on_built, rolling_stock_filter)
 script.on_event(defines.events.script_raised_revive, on_built, rolling_stock_filter)
+
+script.on_event(defines.events.on_entity_cloned, function(e)
+  local source = e.source
+  local destination = e.destination
+
+  local source_train = source.train
+  local destination_train = destination.train
+  if not source_train or not destination_train then
+    return
+  end
+
+  local source_train_data = global.trains[source_train.id]
+  if not source_train_data then
+    return
+  end
+  if global.trains[destination_train.id] then
+    return
+  end
+
+  groups.add_train(destination_train, source_train_data.group)
+end, rolling_stock_filter)
 
 script.on_event(defines.events.on_pre_entity_settings_pasted, function(e)
   if e.source.type == "locomotive" and e.destination.type == "locomotive" then

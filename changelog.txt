@@ -5,6 +5,8 @@ Date: ????
     - Added search to the groups list
   Changes:
     - Overhauled the GUI
+  Bugfixes:
+    - Fixed that train groups were not preserved when trains were cloned
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.7
 Date: 2022-09-04
