@@ -16,6 +16,14 @@ end
 --- @param player LuaPlayer
 --- @param train LuaTrain
 function gui.build(player, train)
+  local caption = { "gui.tgps-no-group-assigned" }
+  local train_data = global.trains[train.id]
+  if train_data then
+    local group_data = global.groups[train_data.force][train_data.group]
+    caption =
+      { "", { "gui.tgps-group" }, ": ", { "gui.tgps-name-and-count", train_data.group, table_size(group_data.trains) } }
+  end
+
   --- @type RelativeGuiElems
   local elems = flib_gui.add(player.gui.relative, {
     {
@@ -32,6 +40,7 @@ function gui.build(player, train)
           type = "button",
           name = "relative_button",
           style = "tgps_relative_group_button",
+          caption = caption,
           tooltip = { "gui.tgps-change-train-group" },
           handler = { [defines.events.on_gui_click] = gui.open_select_group },
         },
@@ -46,8 +55,6 @@ function gui.build(player, train)
     train = train,
   }
   global.relative_guis[player.index] = self
-
-  gui.update_caption(self)
 end
 
 --- @param self RelativeGui
@@ -57,20 +64,6 @@ function gui.destroy(self)
     window.destroy()
   end
   global.relative_guis[self.player.index] = nil
-end
-
--- TODO: This might be unnecessary, since the GUI will be closed and reopened anyway
---- @param self RelativeGui
-function gui.update_caption(self)
-  local button = self.elems.relative_button
-  local train_data = global.trains[self.train.id]
-  if train_data then
-    local group_data = global.groups[train_data.force][train_data.group]
-    button.caption =
-      { "", { "gui.tgps-group" }, ": ", { "gui.tgps-name-and-count", train_data.group, table_size(group_data.trains) } }
-  else
-    button.caption = { "gui.tgps-no-group" }
-  end
 end
 
 --- @param self RelativeGui

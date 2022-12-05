@@ -78,7 +78,7 @@ function gui.build(player, train)
               type = "label",
               name = "textfield_placeholder",
               style_mods = { font_color = { 0, 0, 0, 0.4 } },
-              caption = { "gui.tgps-no-group" },
+              caption = { "gui.tgps-no-group-assigned" },
               ignored_by_interaction = true,
             },
           },
@@ -111,7 +111,7 @@ function gui.build(player, train)
     {
       type = "button",
       style = "tgps_list_box_item",
-      caption = { "gui.tgps-no-group" },
+      caption = { "gui.tgps-no-group-assigned" },
       handler = { [defines.events.on_gui_click] = gui.on_result_click },
     },
   }
