@@ -125,7 +125,7 @@ migration.handle_on_configuration_changed({
       train_data.updating_schedule = nil
     end
   end,
-  ["2.0.0"] = function()
+  ["1.2.0"] = function()
     -- Destroy old GUIs (name was changed)
     for _, player in pairs(game.players) do
       local window = player.gui.relative["tgps-window"]
@@ -134,8 +134,8 @@ migration.handle_on_configuration_changed({
       end
     end
     -- Init new GUIs
-    relative_gui.init()
     change_group_gui.init()
+    relative_gui.init()
   end,
 })
 
