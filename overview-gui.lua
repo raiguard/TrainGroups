@@ -136,7 +136,15 @@ handlers = {
   end,
   --- @param self OverviewGui
   --- @param group_data GroupData
-  ov_remove_group = function(self, group_data)
+  --- @param e EventData.on_gui_click
+  ov_remove_group = function(self, group_data, e)
+    local tags = e.element.tags
+    if game.ticks_played - (tags.last_click or 0) > 30 then
+      self.player.create_local_flying_text({ text = { "message.tgps-click-again-to-confirm" }, create_at_cursor = true })
+      tags.last_click = game.ticks_played
+      e.element.tags = tags
+      return
+    end
     groups.remove_group(self.force_index, group_data.name)
     refresh(self)
   end,
