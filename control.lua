@@ -4,8 +4,8 @@ local table = require("__flib__/table")
 
 local change_group_gui = require("__TrainGroups__/change-group-gui")
 local groups = require("__TrainGroups__/groups")
+local overview_gui = require("__TrainGroups__/overview-gui")
 local train_gui = require("__TrainGroups__/train-gui")
-local util = require("__TrainGroups__/util")
 
 DEBUG = true
 function LOG(msg)
@@ -65,6 +65,7 @@ script.on_init(function()
 
   groups.init()
   change_group_gui.init()
+  overview_gui.init()
   train_gui.init()
 
   for _, force in pairs(game.forces) do
@@ -133,6 +134,7 @@ migration.handle_on_configuration_changed({
     end
     -- Init new GUIs
     change_group_gui.init()
+    overview_gui.init()
     train_gui.init()
   end,
 })
@@ -142,24 +144,34 @@ script.on_event(defines.events.on_force_created, function(e)
 end)
 
 script.on_event(defines.events.on_gui_opened, function(e)
-  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-  local train = util.get_open_train(player)
-  if train then
-    train_gui.build(player, train)
+  if e.gui_type == defines.gui_type.entity then
+    local entity = e.entity
+    if entity and entity.valid and entity.type == "locomotive" then
+      local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+      train_gui.build(player, entity.train)
+    end
+  elseif e.gui_type == defines.gui_type.trains then
+    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+    overview_gui.build(player)
   end
 end)
 
 gui.handle_events()
 
 script.on_event(defines.events.on_gui_closed, function(e)
-  local gui = train_gui.get(e.player_index)
-  if gui then
-    train_gui.destroy(gui)
-  end
-  local gui = change_group_gui.get(e.player_index)
-  if gui then
-    change_group_gui.destroy(gui)
-    player.opened = e.entity
+  if e.gui_type == defines.gui_type.entity then
+    local gui = train_gui.get(e.player_index)
+    if gui then
+      train_gui.destroy(gui)
+    end
+    local gui = change_group_gui.get(e.player_index)
+    if gui then
+      local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+      change_group_gui.destroy(gui)
+      player.opened = e.entity
+    end
+  elseif e.gui_type == defines.gui_type.trains then
+    overview_gui.destroy(e.player_index)
   end
 end)
 

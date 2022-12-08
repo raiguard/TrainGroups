@@ -164,14 +164,21 @@ function groups.rename_group(force_index, current_name, new_name)
     return
   end
 
-  -- Update group name and relocate table
-  group_data.name = new_name
-  global.groups[force_index][new_name] = group_data
-  global.groups[force_index][current_name] = nil
-
-  -- Update all trains in the group
-  for _, train_data in pairs(group_data.trains) do
-    train_data.group = new_name
+  local force_groups = global.groups[force_index]
+  local new_group_data = force_groups[new_name]
+  if new_group_data then
+    -- Merge with existing group
+    for _, train_data in pairs(group_data.trains) do
+      groups.change_train_group(train_data, new_name)
+    end
+  else
+    -- Rename group
+    group_data.name = new_name
+    force_groups[new_name] = group_data
+    force_groups[current_name] = nil
+    for _, train_data in pairs(group_data.trains) do
+      train_data.group = new_name
+    end
   end
 end
 

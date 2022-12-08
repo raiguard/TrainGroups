@@ -2,13 +2,16 @@
 Version: 1.2.0
 Date: ????
   Features:
-    - Added search to the groups list
+    - Added a groups widget to the train overview GUI
+      - Click a group to edit its schedule
+      - Rename or delete a group with the provided buttons
+    - Added search functionality to the change group GUI
   Changes:
-    - Overhauled the GUI
-    - Trains en route to a stop when given a group will select the first station of the same name in that group
+    - The change group GUI is now a popup, instead of everything living at the top of the train GUI
+    - Trains en route to a station when assigned to a group will select the first station of the same name in that group if it exists
   Bugfixes:
-    - Fixed that group schedules would not respect train station renames
-    - Fixed that train groups were not preserved when trains were cloned
+    - Fixed that group schedules would not respect train station renaming
+    - Fixed that groups were not preserved when trains were cloned
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.7
 Date: 2022-09-04
