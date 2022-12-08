@@ -5,6 +5,7 @@ Date: ????
     - Added search to the groups list
   Changes:
     - Overhauled the GUI
+    - Trains en route to a stop when given a group will select the first station of the same name in that group
   Bugfixes:
     - Fixed that group schedules would not respect train station renames
     - Fixed that train groups were not preserved when trains were cloned

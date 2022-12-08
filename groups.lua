@@ -22,6 +22,7 @@ local tss_present = script.active_mods["TrainScheduleSignals"]
 --- Remove temporary stations, remove Train Control Signals skip signal, and remove wait conditions if
 --- they are being managed by Train Schedule Signals
 --- @param records TrainScheduleRecord[]
+--- @return TrainScheduleRecord[]
 local function sanitize_records(records)
   local new = {}
   for _, record in pairs(records) do
@@ -130,9 +131,24 @@ function groups.change_train_group(train_data, new_group)
     local group_trains = group_data.trains
     group_trains[train_data.id] = train_data
 
+    local train = train_data.train
     if not train_data.ignore_schedule and group_data.schedule then
-      train_data.train.schedule = {
-        current = 1,
+      -- Set to the first station of the same name in the group, if any
+      local active_index = 1
+      local current_schedule = train.schedule
+      if current_schedule then
+        local current_record = sanitize_records(current_schedule.records)[current_schedule.current]
+        if current_record then
+          for i, record in pairs(group_data.schedule) do
+            if record.station and record.station == current_record.station then
+              active_index = i
+              break
+            end
+          end
+        end
+      end
+      train.schedule = {
+        current = active_index,
         records = group_data.schedule,
       }
     end
