@@ -1,19 +1,39 @@
 local flib_gui = require("__flib__/gui-lite")
 
 local change_group_gui = require("__TrainGroups__/change-group-gui")
-local util = require("__TrainGroups__/util")
 
 --- @class TrainGuiModule
-local gui = {}
+local train_gui = {}
+--- @class TrainGuiHandlers
+local handlers = {
+  --- @param self TrainGui
+  tr_open_change_group = function(self)
+    local cg_gui = change_group_gui.get(self.player.index)
+    if cg_gui then
+      cg_gui.elems.tgps_change_group_window.bring_to_front()
+    else
+      change_group_gui.build(self.player, self.train)
+    end
+  end,
+}
 
-function gui.init()
+flib_gui.add_handlers(handlers, function(e, handler)
+  local self = train_gui.get(e.player_index)
+  if self then
+    handler(self)
+  end
+end)
+
+function train_gui.init()
   --- @type table<uint, TrainGui>
   global.train_guis = {}
 end
 
 --- @param player LuaPlayer
 --- @param train LuaTrain
-function gui.build(player, train)
+function train_gui.build(player, train)
+  train_gui.destroy(player.index) -- Just in case
+
   local caption = { "gui.tgps-no-group-assigned" }
   local train_data = global.trains[train.id]
   if train_data then
@@ -38,7 +58,7 @@ function gui.build(player, train)
           style = "tgps_relative_group_button",
           caption = caption,
           tooltip = { "gui.tgps-change-train-group" },
-          handler = { [defines.events.on_gui_click] = gui.open_change_group },
+          handler = { [defines.events.on_gui_click] = handlers.tr_open_change_group },
         },
       },
     },
@@ -53,8 +73,12 @@ function gui.build(player, train)
   global.train_guis[player.index] = self
 end
 
---- @param self TrainGui
-function gui.destroy(self)
+--- @param player_index uint
+function train_gui.destroy(player_index)
+  local self = global.train_guis[player_index]
+  if not self then
+    return
+  end
   local window = self.window
   if window and window.valid then
     window.destroy()
@@ -63,28 +87,11 @@ function gui.destroy(self)
 end
 
 --- @param player_index uint
-function gui.get(player_index)
+function train_gui.get(player_index)
   local pgui = global.train_guis[player_index]
   if pgui and pgui.window.valid then
     return pgui
   end
 end
 
---- @param self TrainGui
-function gui.open_change_group(self)
-  local cg_gui = change_group_gui.get(self.player.index)
-  if cg_gui then
-    cg_gui.elems.tgps_change_group_window.bring_to_front()
-  else
-    change_group_gui.build(self.player, self.train)
-  end
-end
-
-util.add_gui_handlers(gui, "relative", function(e, handler)
-  local self = gui.get(e.player_index)
-  if self then
-    handler(self)
-  end
-end)
-
-return gui
+return train_gui

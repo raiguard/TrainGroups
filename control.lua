@@ -160,15 +160,9 @@ gui.handle_events()
 
 script.on_event(defines.events.on_gui_closed, function(e)
   if e.gui_type == defines.gui_type.entity then
-    local gui = train_gui.get(e.player_index)
-    if gui then
-      train_gui.destroy(gui)
-    end
-    local gui = change_group_gui.get(e.player_index)
-    if gui then
-      local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-      change_group_gui.destroy(gui)
-      player.opened = e.entity
+    train_gui.destroy(e.player_index)
+    if change_group_gui.destroy(e.player_index) then
+      game.get_player(e.player_index).opened = e.entity
     end
   elseif e.gui_type == defines.gui_type.trains then
     overview_gui.destroy(e.player_index)
