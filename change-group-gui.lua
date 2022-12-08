@@ -4,8 +4,8 @@ local groups = require("__TrainGroups__/groups")
 local util = require("__TrainGroups__/util")
 
 --- @class SelectGroupGuiElems
---- @field tgps_select_group_window LuaGuiElement
---- @field tgps_select_group_overlay LuaGuiElement
+--- @field tgps_change_group_window LuaGuiElement
+--- @field tgps_change_group_overlay LuaGuiElement
 --- @field textfield LuaGuiElement
 --- @field textfield_placeholder LuaGuiElement
 --- @field scroll_pane LuaGuiElement
@@ -28,20 +28,20 @@ function gui.build(player, train)
   local elems = flib_gui.add(player.gui.screen, {
     {
       type = "frame",
-      name = "tgps_select_group_overlay",
+      name = "tgps_change_group_overlay",
       style = "invisible_frame",
       style_mods = { size = overlay_size },
       handler = { [defines.events.on_gui_click] = gui.destroy },
     },
     {
       type = "frame",
-      name = "tgps_select_group_window",
+      name = "tgps_change_group_window",
       direction = "vertical",
       elem_mods = { auto_center = true },
       {
         type = "flow",
         style = "flib_titlebar_flow",
-        drag_target = "tgps_select_group_window",
+        drag_target = "tgps_change_group_window",
         {
           type = "label",
           style = "frame_title",
@@ -144,15 +144,23 @@ end
 
 --- @param self ChangeGroupGui
 function gui.destroy(self)
-  local window = self.elems.tgps_select_group_window
+  local window = self.elems.tgps_change_group_window
   if window.valid then
     window.destroy()
   end
-  local overlay = self.elems.tgps_select_group_overlay
+  local overlay = self.elems.tgps_change_group_overlay
   if overlay and overlay.valid then
     overlay.destroy()
   end
   global.change_group_guis[self.player.index] = nil
+end
+
+--- @param player_index uint
+function gui.get(player_index)
+  local pgui = global.change_group_guis[player_index]
+  if pgui and pgui.elems.tgps_change_group_window.valid then
+    return pgui
+  end
 end
 
 --- @param self ChangeGroupGui
@@ -161,13 +169,13 @@ function gui.on_confirmed(self)
 end
 
 --- @param self ChangeGroupGui
---- @param e on_gui_click
+--- @param e EventData.on_gui_click
 function gui.on_result_click(self, e)
   gui.select_group(self, e.element.name)
 end
 
 --- @param self ChangeGroupGui
---- @param e on_gui_elem_changed
+--- @param e EventData.on_gui_elem_changed
 function gui.add_icon(self, e)
   local button = e.element
   local signal = button.elem_value
@@ -217,8 +225,7 @@ function gui.update(self)
 end
 
 util.add_gui_handlers(gui, "change_group", function(e, handler)
-  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-  local self = util.get_change_group_gui(player)
+  local self = gui.get(e.player_index)
   if self then
     handler(self, e)
   end

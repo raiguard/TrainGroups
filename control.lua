@@ -4,7 +4,7 @@ local table = require("__flib__/table")
 
 local change_group_gui = require("__TrainGroups__/change-group-gui")
 local groups = require("__TrainGroups__/groups")
-local relative_gui = require("__TrainGroups__/relative-gui")
+local train_gui = require("__TrainGroups__/train-gui")
 local util = require("__TrainGroups__/util")
 
 DEBUG = true
@@ -60,14 +60,12 @@ local rolling_stock_types = {
   ["artillery-wagon"] = true,
 }
 
-gui.handle_events()
-
 script.on_init(function()
   on_se_elevator()
 
   groups.init()
   change_group_gui.init()
-  relative_gui.init()
+  train_gui.init()
 
   for _, force in pairs(game.forces) do
     groups.init_force(force)
@@ -135,7 +133,7 @@ migration.handle_on_configuration_changed({
     end
     -- Init new GUIs
     change_group_gui.init()
-    relative_gui.init()
+    train_gui.init()
   end,
 })
 
@@ -147,17 +145,18 @@ script.on_event(defines.events.on_gui_opened, function(e)
   local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
   local train = util.get_open_train(player)
   if train then
-    relative_gui.build(player, train)
+    train_gui.build(player, train)
   end
 end)
 
+gui.handle_events()
+
 script.on_event(defines.events.on_gui_closed, function(e)
-  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-  local gui = util.get_relative_gui(player)
+  local gui = train_gui.get(e.player_index)
   if gui then
-    relative_gui.destroy(gui)
+    train_gui.destroy(gui)
   end
-  local gui = util.get_change_group_gui(player)
+  local gui = change_group_gui.get(e.player_index)
   if gui then
     change_group_gui.destroy(gui)
     player.opened = e.entity
