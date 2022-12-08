@@ -140,7 +140,7 @@ function change_group_gui.build(player, train)
           hovered_sprite = "utility/close_black",
           clicked_sprite = "utility/close_black",
           tooltip = { "gui.close-instruction" },
-          handler = { [defines.events.on_gui_click] = handlers.cg_destroy },
+          handler = handlers.cg_destroy,
         },
       },
       {
@@ -181,7 +181,7 @@ function change_group_gui.build(player, train)
             style = "flib_tool_button_light_green",
             sprite = "utility/enter",
             tooltip = { "gui.confirm" },
-            handler = { [defines.events.on_gui_click] = handlers.cg_on_confirmed },
+            handler = handlers.cg_on_confirmed,
           },
         },
         { type = "scroll-pane", name = "scroll_pane", style = "tgps_list_box_scroll_pane" },
@@ -196,7 +196,7 @@ function change_group_gui.build(player, train)
       type = "button",
       style = "tgps_list_box_item",
       caption = { "gui.tgps-no-group-assigned" },
-      handler = { [defines.events.on_gui_click] = handlers.cg_on_result_click },
+      handler = handlers.cg_on_result_click,
     },
   }
   for name, group_data in pairs(global.groups[player.force.index]) do
@@ -205,7 +205,7 @@ function change_group_gui.build(player, train)
       name = name,
       style = "tgps_list_box_item",
       caption = { "gui.tgps-name-and-count", name, table_size(group_data.trains) },
-      handler = { [defines.events.on_gui_click] = handlers.cg_on_result_click },
+      handler = handlers.cg_on_result_click,
     })
   end
   table.sort(items, function(a, b)

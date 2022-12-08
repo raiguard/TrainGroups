@@ -58,7 +58,7 @@ function train_gui.build(player, train)
           style = "tgps_relative_group_button",
           caption = caption,
           tooltip = { "gui.tgps-change-train-group" },
-          handler = { [defines.events.on_gui_click] = handlers.tr_open_change_group },
+          handler = handlers.tr_open_change_group,
         },
       },
     },
