@@ -172,6 +172,22 @@ function groups.remove_group(force_index, group)
   end
 end
 
+--- @param force_groups table<string, GroupData>
+--- @param old_name string
+--- @param new_name string
+function groups.rename_station(force_groups, old_name, new_name)
+  for _, group_data in pairs(force_groups) do
+    local schedule = group_data.schedule
+    if schedule then
+      for _, record in pairs(schedule) do
+        if record.station and record.station == old_name then
+          record.station = new_name
+        end
+      end
+    end
+  end
+end
+
 --- @param train LuaTrain
 --- @param old_id_1 uint?
 --- @param old_id_2 uint?

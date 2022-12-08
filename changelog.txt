@@ -6,6 +6,7 @@ Date: ????
   Changes:
     - Overhauled the GUI
   Bugfixes:
+    - Fixed that group schedules would not respect train station renames
     - Fixed that train groups were not preserved when trains were cloned
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.7

@@ -318,6 +318,21 @@ script.on_event(defines.events.on_train_schedule_changed, function(e)
   end
 end)
 
+script.on_event(defines.events.on_entity_renamed, function(e)
+  local entity = e.entity
+  if entity.type ~= "train-stop" then
+    return
+  end
+  local force_groups = global.groups[entity.force.index]
+  if not force_groups then
+    return
+  end
+  local force = entity.force
+  if #game.get_train_stops({ force = force, name = e.old_name }) == 0 then
+    groups.rename_station(force_groups, e.old_name, entity.backer_name)
+  end
+end)
+
 script.on_event(defines.events.on_tick, function()
   for train_id in pairs(global.to_delete) do
     local train_data = global.trains[train_id]
