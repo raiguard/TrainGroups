@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.0
-Date: ????
+Date: 2022-12-09
   Features:
     - Added a button to the overview GUI to automatically create groups based on matching train schedules
   Bugfixes:
