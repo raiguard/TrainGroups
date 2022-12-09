@@ -111,9 +111,8 @@ function change_group_gui.build(player, train)
   --- @type SelectGroupGuiElems
   local elems = flib_gui.add(player.gui.screen, {
     {
-      type = "frame",
+      type = "empty-widget",
       name = "tgps_change_group_overlay",
-      style = "invisible_frame",
       style_mods = { size = overlay_size },
       handler = { [defines.events.on_gui_click] = handlers.cg_destroy },
     },
