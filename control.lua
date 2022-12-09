@@ -218,6 +218,13 @@ script.on_event(defines.events.on_player_setup_blueprint, function(e)
   end
 end)
 
+script.on_event(
+  { defines.events.on_player_display_resolution_changed, defines.events.on_player_display_scale_changed },
+  function(e)
+    overview_gui.set_height(e.player_index)
+  end
+)
+
 --- @param e on_built_entity|on_robot_built_entity|script_raised_built|script_raised_revive
 local function on_built(e)
   local tags = e.tags

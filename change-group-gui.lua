@@ -183,7 +183,12 @@ function change_group_gui.build(player, train)
             handler = handlers.cg_on_confirmed,
           },
         },
-        { type = "scroll-pane", name = "scroll_pane", style = "tgps_list_box_scroll_pane" },
+        {
+          type = "scroll-pane",
+          name = "scroll_pane",
+          style = "tgps_list_box_scroll_pane",
+          style_mods = { maximal_height = 28 * 16 },
+        },
       },
     },
   })

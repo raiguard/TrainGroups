@@ -15,6 +15,16 @@ local handlers
 
 --- @param self OverviewGui
 local function refresh(self)
+  -- Window height
+  local window = self.elems.tgps_overview_window
+  local player = self.player
+  local resolution, scale = player.display_resolution, player.display_scale
+  if resolution.height / scale < 950 then
+    window.style.height = (resolution.height - 12) / scale
+  else
+    window.style.height = (resolution.height / scale) - (150 * scale)
+  end
+  -- List box
   --- @type GuiElemDef[]
   local items = {}
   for name, group_data in pairs(global.groups[self.player.force.index]) do
@@ -226,7 +236,12 @@ function overview_gui.build(player)
           handler = { [defines.events.on_gui_elem_changed] = handlers.ov_add_icon },
         },
       },
-      { type = "scroll-pane", name = "scroll_pane", style = "tgps_list_box_scroll_pane" },
+      {
+        type = "scroll-pane",
+        name = "scroll_pane",
+        style = "tgps_list_box_scroll_pane",
+        style_mods = { vertically_stretchable = true },
+      },
     },
   })
 
@@ -258,6 +273,14 @@ function overview_gui.get(player_index)
   local gui = global.overview_guis[player_index]
   if gui and gui.elems.tgps_overview_window.valid then
     return gui
+  end
+end
+
+--- @param player_index uint
+function overview_gui.set_height(player_index)
+  local self = overview_gui.get(player_index)
+  if self then
+    refresh(self)
   end
 end
 
