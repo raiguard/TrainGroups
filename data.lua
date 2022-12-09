@@ -26,6 +26,8 @@ styles.tgps_list_box_scroll_pane = {
   vertical_flow_style = {
     type = "vertical_flow_style",
     vertical_spacing = 0,
+    width = 300,
+    vertically_stretchable = "on",
   },
 }
 
@@ -33,4 +35,5 @@ styles.tgps_list_box_item = {
   type = "button_style",
   parent = "list_box_item",
   horizontally_stretchable = "on",
+  horizontally_squashable = "on",
 }

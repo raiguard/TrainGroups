@@ -48,6 +48,17 @@ local function sanitize_records(records)
   return new
 end
 
+--- @param records TrainScheduleRecord[]
+--- @return string
+local function get_schedule_string(records)
+  local out = {}
+  for _, record in pairs(sanitize_records(records)) do
+    table.insert(out, record.station)
+  end
+  return table.concat(out, " → ")
+end
+
+--- @class GroupsMod
 local groups = {}
 
 function groups.init()
@@ -279,6 +290,25 @@ function groups.update_group_schedule(train)
   for _, invalid_train_data in pairs(to_remove) do
     LOG("FOUND INVALID TRAIN: [" .. invalid_train_data.id .. "]")
     groups.remove_train(invalid_train_data)
+  end
+end
+
+--- @param force_index uint
+function groups.auto_create(force_index)
+  local force = game.forces[force_index]
+  for _, surface in pairs(game.surfaces) do
+    for _, train in pairs(surface.get_trains(force)) do
+      if global.trains[train.id] then
+        goto continue
+      end
+      local schedule = train.schedule
+      if not schedule then
+        goto continue
+      end
+      local group_name = get_schedule_string(schedule.records)
+      groups.add_train(train, group_name, true)
+      ::continue::
+    end
   end
 end
 

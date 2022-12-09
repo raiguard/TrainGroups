@@ -5,8 +5,9 @@ local groups = require("__TrainGroups__/groups")
 
 --- @class OverviewGuiElems
 --- @field tgps_overview_window LuaGuiElement
---- @field scroll_pane LuaGuiElement
 --- @field search_textfield LuaGuiElement
+--- @field scroll_pane LuaGuiElement
+--- @field no_groups_flow LuaGuiElement
 
 --- @class OverviewGuiMod
 local overview_gui = {}
@@ -28,6 +29,7 @@ local function refresh(self)
   --- @type GuiElemDef[]
   local items = {}
   for name, group_data in pairs(global.groups[self.player.force.index]) do
+    local caption = { "gui.tgps-name-and-count", name, table_size(group_data.trains) }
     table.insert(items, {
       type = "flow",
       name = name,
@@ -40,9 +42,8 @@ local function refresh(self)
           type = "button",
           name = "group_button",
           style = "tgps_list_box_item",
-          style_mods = { horizontally_stretchable = true },
-          caption = { "gui.tgps-name-and-count", name, table_size(group_data.trains) },
-          tooltip = { "gui.tgps-edit-schedule" },
+          caption = caption,
+          tooltip = { "", "[font=default-semibold]", caption, "[/font]\n", { "gui.tgps-click-to-edit-schedule" } },
           tags = { group = name },
           handler = handlers.ov_edit_schedule,
         },
@@ -102,8 +103,16 @@ local function refresh(self)
   end)
   local scroll_pane = self.elems.scroll_pane
   scroll_pane.clear()
-  flib_gui.add(scroll_pane, items)
-  handlers.ov_filter(self)
+  local no_groups_flow = self.elems.no_groups_flow
+  if #items > 0 then
+    scroll_pane.visible = true
+    no_groups_flow.visible = false
+    flib_gui.add(scroll_pane, items)
+    handlers.ov_filter(self)
+  else
+    scroll_pane.visible = false
+    no_groups_flow.visible = true
+  end
 end
 
 --- @class OverviewGuiHandlers
@@ -121,6 +130,13 @@ handlers = {
     end
     button.elem_value = { type = "virtual", name = "tgps-signal-icon-selector" }
   end,
+
+  --- @param self OverviewGui
+  ov_auto_create_groups = function(self)
+    groups.auto_create(self.force_index)
+    refresh(self)
+  end,
+
   --- @param group_data GroupData
   --- @param e EventData.on_gui_click
   ov_cancel_rename = function(_, group_data, e)
@@ -128,6 +144,7 @@ handlers = {
     e.element.parent.textfield.text = group_data.name
     e.element.parent.parent.standard.visible = true
   end,
+
   --- @param self OverviewGui
   ov_filter = function(self)
     local text = self.elems.search_textfield.text
@@ -135,6 +152,7 @@ handlers = {
       elem.visible = not not string.find(elem.name, text, nil, true)
     end
   end,
+
   --- @param self OverviewGui
   --- @param group_data GroupData
   ov_edit_schedule = function(self, group_data)
@@ -144,6 +162,7 @@ handlers = {
     end
     self.player.opened = flib_train.get_main_locomotive(train_data.train)
   end,
+
   --- @param self OverviewGui
   --- @param group_data GroupData
   --- @param e EventData.on_gui_click
@@ -158,12 +177,14 @@ handlers = {
     groups.remove_group(self.force_index, group_data.name)
     refresh(self)
   end,
+
   --- @param self OverviewGui
   --- @param e EventData.on_gui_click
   ov_rename_group = function(self, group_data, e)
     groups.rename_group(self.force_index, group_data.name, e.element.parent.textfield.text)
     refresh(self)
   end,
+
   --- @param e EventData.on_gui_click
   ov_start_rename = function(_, _, e)
     local rename_flow = e.element.parent.parent.rename
@@ -205,7 +226,6 @@ function overview_gui.build(player)
   local elems = flib_gui.add(player.gui.relative, {
     type = "frame",
     name = "tgps_overview_window",
-    style_mods = { minimal_width = 300 },
     caption = { "gui.tgps-groups" },
     anchor = {
       gui = defines.relative_gui_type.trains_gui,
@@ -214,6 +234,7 @@ function overview_gui.build(player)
     {
       type = "frame",
       style = "inside_deep_frame",
+      style_mods = { width = 300 },
       direction = "vertical",
       {
         type = "frame",
@@ -240,7 +261,25 @@ function overview_gui.build(player)
         type = "scroll-pane",
         name = "scroll_pane",
         style = "tgps_list_box_scroll_pane",
-        style_mods = { vertically_stretchable = true },
+      },
+      {
+        type = "flow",
+        name = "no_groups_flow",
+        style_mods = {
+          horizontal_align = "center",
+          horizontally_stretchable = true,
+          vertical_align = "center",
+          vertically_stretchable = true,
+          vertical_spacing = 12,
+        },
+        direction = "vertical",
+        { type = "label", caption = { "gui.tgps-no-groups-message" } },
+        {
+          type = "button",
+          caption = { "gui.tgps-auto-create-groups" },
+          tooltip = { "gui.tgps-auto-create-groups-tooltip" },
+          handler = handlers.ov_auto_create_groups,
+        },
       },
     },
   })

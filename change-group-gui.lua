@@ -152,6 +152,7 @@ function change_group_gui.build(player, train)
           {
             type = "textfield",
             name = "textfield",
+            style = "flib_widthless_textfield",
             style_mods = { horizontally_stretchable = true },
             handler = {
               [defines.events.on_gui_confirmed] = handlers.cg_on_confirmed,
