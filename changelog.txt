@@ -5,6 +5,7 @@ Date: ????
     - Added a button to the overview GUI to automatically create groups based on matching train schedules
   Bugfixes:
     - Fixed the heights of the choose group and overview GUIs not being capped
+    - [Space Exploration] Fixed an occasional crash when a train goes through a space elevator
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
 Date: 2022-12-09

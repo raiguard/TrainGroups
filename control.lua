@@ -16,7 +16,7 @@ end
 
 --- @class on_train_teleported
 --- @field train LuaTrain
---- @field old_train_id_1 uint
+--- @field old_train_id_1 uint?
 --- @field old_surface_index uint
 --- @field teleporter LuaEntity
 
@@ -41,7 +41,7 @@ local function on_se_elevator()
       remote.call("space-exploration", "get_on_train_teleport_finished_event"),
       --- @param e on_train_teleported
       function(e)
-        LOG("ON_TRAIN_TELEPORT_FINISHED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
+        LOG("ON_TRAIN_TELEPORT_FINISHED: [" .. (e.old_train_id_1 or "") .. "] -> [" .. e.train.id .. "]")
         local train_data = global.trains[e.train.id]
         if train_data then
           train_data.ignore_schedule = false
