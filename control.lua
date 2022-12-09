@@ -7,7 +7,7 @@ local groups = require("__TrainGroups__/groups")
 local overview_gui = require("__TrainGroups__/overview-gui")
 local train_gui = require("__TrainGroups__/train-gui")
 
-DEBUG = true
+DEBUG = false
 function LOG(msg)
   if __DebugAdapter or DEBUG then
     log({ "", "[" .. game.tick .. "] ", msg })
