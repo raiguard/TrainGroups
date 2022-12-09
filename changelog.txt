@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
-Date: ????
+Date: 2022-12-09
   Features:
     - Added a groups widget to the train overview GUI
       - Click a group to edit its schedule
