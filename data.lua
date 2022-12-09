@@ -23,10 +23,11 @@ styles.tgps_relative_group_button = {
 styles.tgps_list_box_scroll_pane = {
   type = "scroll_pane_style",
   parent = "list_box_scroll_pane",
+  graphical_set = styles.flib_naked_scroll_pane.graphical_set,
+  width = 300,
   vertical_flow_style = {
     type = "vertical_flow_style",
     vertical_spacing = 0,
-    width = 300,
     vertically_stretchable = "on",
   },
 }
