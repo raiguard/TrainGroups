@@ -225,7 +225,7 @@ script.on_event(
   end
 )
 
---- @param e on_built_entity|on_robot_built_entity|script_raised_built|script_raised_revive
+--- @param e EventData.on_built_entity|EventData.on_robot_built_entity|EventData.script_raised_built|EventData.script_raised_revive
 local function on_built(e)
   local tags = e.tags
   if not tags or not tags.train_group then
@@ -298,7 +298,7 @@ script.on_event(defines.events.on_entity_settings_pasted, function(e)
   end
 end)
 
---- @param e on_player_mined_entity|on_robot_mined_entity|on_entity_died|script_raised_destroy
+--- @param e EventData.on_player_mined_entity|EventData.on_robot_mined_entity|EventData.on_entity_died|EventData.script_raised_destroy
 local function on_destroyed(e)
   local train = e.entity.train --[[@as LuaTrain]]
   LOG(string.upper(table.find(defines.events, e.name)) .. ": [" .. train.id .. "]")
