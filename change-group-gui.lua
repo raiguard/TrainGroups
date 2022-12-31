@@ -89,9 +89,25 @@ handlers = {
 
 flib_gui.add_handlers(handlers, function(e, handler)
   local self = change_group_gui.get(e.player_index)
-  if self then
-    handler(self, e)
+  if not self and self.train.valid then
+    return
   end
+  if not self.train.valid then
+    if self.player.opened_gui_type ~= defines.gui_type.entity then
+      return
+    end
+    local opened = self.player.opened
+    if not opened or opened.type ~= "locomotive" then
+      return
+    end
+    local train = opened.train
+    if not train or not train.valid then
+      return
+    end
+    self.train = train --[[@as LuaTrain]]
+  end
+
+  handler(self, e)
 end)
 
 function change_group_gui.init()
