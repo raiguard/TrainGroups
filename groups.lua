@@ -62,11 +62,11 @@ end
 local groups = {}
 
 function groups.init()
-  --- @type table<number, table<string, GroupData>>
+  --- @type table<number, table<string, GroupData?>>
   global.groups = {}
   --- @type table<number, boolean>
   global.to_delete = {}
-  --- @type table<number, TrainData>
+  --- @type table<number, TrainData?>
   global.trains = {}
 end
 
@@ -206,7 +206,7 @@ function groups.remove_group(force_index, group)
   end
 end
 
---- @param force_groups table<string, GroupData>
+--- @param force_groups table<string, GroupData?>
 --- @param old_name string
 --- @param new_name string
 function groups.rename_station(force_groups, old_name, new_name)
@@ -307,6 +307,11 @@ function groups.auto_create(force_index)
       end
       local group_name = get_schedule_string(schedule.records)
       groups.add_train(train, group_name, true)
+      local train_data = global.trains[train.id]
+      if not train_data then
+        goto continue
+      end
+      train_data.ignore_schedule = false
       ::continue::
     end
   end

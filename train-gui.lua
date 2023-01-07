@@ -38,8 +38,14 @@ function train_gui.build(player, train)
   local train_data = global.trains[train.id]
   if train_data then
     local group_data = global.groups[train_data.force][train_data.group]
-    caption =
-      { "", { "gui.tgps-group" }, ": ", { "gui.tgps-name-and-count", train_data.group, table_size(group_data.trains) } }
+    if group_data then
+      caption = {
+        "",
+        { "gui.tgps-group" },
+        ": ",
+        { "gui.tgps-name-and-count", train_data.group, table_size(group_data.trains) },
+      }
+    end
   end
 
   local _, window = flib_gui.add(player.gui.relative, {

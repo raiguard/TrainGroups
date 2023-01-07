@@ -1,7 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.2
 Date: ????
-  Features:
+  Bugfixes:
+    - Fixed that groups created with the auto-generation feature would never sync schedules
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.1
 Date: 2022-12-31

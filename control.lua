@@ -137,6 +137,12 @@ migration.handle_on_configuration_changed({
     overview_gui.init()
     train_gui.init()
   end,
+  ["1.3.2"] = function()
+    -- Ensure that all trains can sync schedules
+    for _, train_data in pairs(global.trains) do
+      train_data.ignore_schedule = false
+    end
+  end,
 })
 
 script.on_event(defines.events.on_force_created, function(e)
