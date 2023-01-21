@@ -265,6 +265,10 @@ function groups.update_group_schedule(train)
   -- Update stored schedule for the group
   LOG("UPDATE SCHEDULE: [" .. train_data.group .. "]")
   local records = train.schedule and sanitize_records(train.schedule.records)
+  -- Don't continue if the schedule hasn't actually changed
+  if records and group_data.schedule and table.deep_compare(group_data.schedule, records) then
+    return
+  end
   group_data.schedule = records
 
   -- Update schedule for all trains in the group
