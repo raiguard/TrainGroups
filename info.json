@@ -3,9 +3,14 @@
   "version": "1.3.4",
   "title": "Train Groups",
   "author": "raiguard",
-  "contact": "https://lists.sr.ht/~raiguard/factorio-mods-discuss",
-  "homepage": "https://sr.ht/~raiguard/factorio-mods",
+  "contact": "https://github.com/raiguard/TrainGroups",
+  "homepage": "https://github.com/raiguard/TrainGroups",
   "description": "Trains assigned to the same group will have the same schedule. Includes support for Train Control Signals.",
   "factorio_version": "1.1",
-  "dependencies": ["base >= 1.1.74", "flib >= 0.12.0", "? Train_Control_Signals", "? TrainScheduleSignals"]
+  "dependencies": [
+    "base >= 1.1.74",
+    "flib >= 0.12.0",
+    "? Train_Control_Signals",
+    "? TrainScheduleSignals"
+  ]
 }
