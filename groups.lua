@@ -278,11 +278,13 @@ function groups.update_group_schedule(train)
       if other_data.train.valid then
         local other_train = other_data.train
         local other_train_schedule = other_train.schedule
-        if records then
+        if records and #records > 0 then
           other_train.schedule = {
             current = other_train_schedule and math.min(other_train_schedule.current, #records) or 1,
             records = records,
           }
+        else
+          other_train.schedule = nil
         end
       else
         table.insert(to_remove, other_data)
