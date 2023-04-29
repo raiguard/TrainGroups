@@ -7,5 +7,13 @@
   "homepage": "https://github.com/raiguard/TrainGroups",
   "description": "Trains assigned to the same group will have the same schedule. Includes support for Train Control Signals.",
   "factorio_version": "1.1",
-  "dependencies": [ "base >= 1.1.76", "flib >= 0.12.6", "? Train_Control_Signals", "? TrainScheduleSignals" ]
+  "dependencies": [ "base >= 1.1.76", "flib >= 0.12.6", "? Train_Control_Signals", "? TrainScheduleSignals" ],
+  "package": {
+    "git_publish_branch": "master",
+    "ignore": [ "crowdin.yml", "imgui.ini", "screenshots/*", "stylua.toml" ],
+    "scripts": {
+      "prepublish": "factorio-crowdin-sync"
+    },
+    "sync_portal_details": true
+  }
 }
