@@ -6,6 +6,7 @@ Date: ????
   Bugfixes:
     - Fixed a crash when adding a temporary stop when the train is in a group with no schedule (#15)
     - Fixed that removing the last stop in a schedule would not reflect that change to other trains in the group (#15)
+    - [Space Exploration] Fixed that the change groups GUI would get stuck open if the open train went through a space elevator (#16)
 ---------------------------------------------------------------------------------------------------
 Version: 1.3.3
 Date: 2023-01-21

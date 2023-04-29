@@ -35,6 +35,13 @@ local function on_se_elevator()
           old_train_data.ignore_schedule = true
           groups.migrate_trains(e.train, e.old_train_id_1)
         end
+        -- XXX: on_gui_closed isn't raised when a train starts going through an elevator
+        for _, gui_data in pairs(global.change_group_guis) do
+          local train = gui_data.train
+          if train.valid and train.id == e.old_train_id_1 then
+            change_group_gui.destroy(gui_data.player.index)
+          end
+        end
       end
     )
     script.on_event(
