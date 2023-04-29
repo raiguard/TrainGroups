@@ -16,15 +16,6 @@ local handlers
 
 --- @param self OverviewGui
 local function refresh(self)
-  -- Window height
-  local window = self.elems.tgps_overview_window
-  local player = self.player
-  local resolution, scale = player.display_resolution, player.display_scale
-  if resolution.height / scale < 950 then
-    window.style.height = (resolution.height - 12) / scale
-  else
-    window.style.height = (resolution.height / scale) - (150 * scale)
-  end
   -- List box
   --- @type GuiElemDef[]
   local items = {}
@@ -226,6 +217,7 @@ function overview_gui.build(player)
   local elems = flib_gui.add(player.gui.relative, {
     type = "frame",
     name = "tgps_overview_window",
+    style_mods = { vertically_stretchable = true },
     caption = { "gui.tgps-groups" },
     anchor = {
       gui = defines.relative_gui_type.trains_gui,
