@@ -1,6 +1,6 @@
 local flib_gui = require("__flib__/gui-lite")
 
-local groups = require("__TrainGroups__/groups")
+local groups = require("__TrainGroups__/scripts/groups")
 
 --- @class SelectGroupGuiElems
 --- @field tgps_change_group_window LuaGuiElement

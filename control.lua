@@ -2,10 +2,10 @@ local gui = require("__flib__/gui-lite")
 local migration = require("__flib__/migration")
 local table = require("__flib__/table")
 
-local change_group_gui = require("__TrainGroups__/change-group-gui")
-local groups = require("__TrainGroups__/groups")
-local overview_gui = require("__TrainGroups__/overview-gui")
-local train_gui = require("__TrainGroups__/train-gui")
+local change_group_gui = require("__TrainGroups__/scripts/change-group-gui")
+local groups = require("__TrainGroups__/scripts/groups")
+local overview_gui = require("__TrainGroups__/scripts/overview-gui")
+local train_gui = require("__TrainGroups__/scripts/train-gui")
 
 DEBUG = false
 function LOG(msg)

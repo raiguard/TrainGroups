@@ -1,7 +1,7 @@
 local flib_gui = require("__flib__/gui-lite")
 local flib_train = require("__flib__/train")
 
-local groups = require("__TrainGroups__/groups")
+local groups = require("__TrainGroups__/scripts/groups")
 
 --- @class OverviewGuiElems
 --- @field tgps_overview_window LuaGuiElement

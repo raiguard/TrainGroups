@@ -1,6 +1,6 @@
 local flib_gui = require("__flib__/gui-lite")
 
-local change_group_gui = require("__TrainGroups__/change-group-gui")
+local change_group_gui = require("__TrainGroups__/scripts/change-group-gui")
 
 --- @class TrainGuiModule
 local train_gui = {}
