@@ -24,11 +24,6 @@ flib_gui.add_handlers(handlers, function(e, handler)
   end
 end)
 
-function train_gui.init()
-  --- @type table<uint, TrainGui>
-  global.train_guis = {}
-end
-
 --- @param player LuaPlayer
 --- @param train LuaTrain
 function train_gui.build(player, train)
@@ -99,5 +94,42 @@ function train_gui.get(player_index)
     return pgui
   end
 end
+
+--- @param e EventData.on_gui_opened
+local function on_gui_opened(e)
+  local entity = e.entity
+  if e.gui_type ~= defines.gui_type.entity then
+    return
+  end
+  if not entity or not entity.valid or entity.type ~= "locomotive" then
+    return
+  end
+  local train = entity.train
+  if not train then
+    return
+  end
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
+  train_gui.build(player, entity.train)
+end
+
+--- @param e EventData.on_gui_closed
+local function on_gui_closed(e)
+  if e.gui_type == defines.gui_type.entity then
+    train_gui.destroy(e.player_index)
+  end
+end
+
+function train_gui.on_init()
+  --- @type table<uint, TrainGui>
+  global.train_guis = {}
+end
+
+train_gui.events = {
+  [defines.events.on_gui_closed] = on_gui_closed,
+  [defines.events.on_gui_opened] = on_gui_opened,
+}
 
 return train_gui

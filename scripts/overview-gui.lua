@@ -124,7 +124,7 @@ handlers = {
 
   --- @param self OverviewGui
   ov_auto_create_groups = function(self)
-    groups.auto_create(self.force_index)
+    groups.auto_create_groups(self.force_index)
     refresh(self)
   end,
 
@@ -203,11 +203,6 @@ flib_gui.add_handlers(handlers, function(e, handler)
   end
   handler(self, group_data, e)
 end)
-
-function overview_gui.init()
-  --- @type table<uint, OverviewGui>
-  global.overview_guis = {}
-end
 
 --- @param player LuaPlayer
 function overview_gui.build(player)
@@ -314,5 +309,37 @@ function overview_gui.set_height(player_index)
     refresh(self)
   end
 end
+
+--- @param e EventData.on_gui_opened
+local function on_gui_opened(e)
+  if e.gui_type == defines.gui_type.trains then
+    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+    overview_gui.build(player)
+  end
+end
+
+--- @param e EventData.on_gui_closed
+local function on_gui_closed(e)
+  if e.gui_type == defines.gui_type.trains then
+    overview_gui.destroy(e.player_index)
+  end
+end
+
+--- @param e EventData.on_player_display_resolution_changed|EventData.on_player_display_scale_changed
+local function on_player_display_settings_changed(e)
+  overview_gui.set_height(e.player_index)
+end
+
+function overview_gui.on_init()
+  --- @type table<uint, OverviewGui>
+  global.overview_guis = {}
+end
+
+overview_gui.events = {
+  [defines.events.on_gui_closed] = on_gui_closed,
+  [defines.events.on_gui_opened] = on_gui_opened,
+  [defines.events.on_player_display_resolution_changed] = on_player_display_settings_changed,
+  [defines.events.on_player_display_scale_changed] = on_player_display_settings_changed,
+}
 
 return overview_gui

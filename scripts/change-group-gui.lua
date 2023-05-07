@@ -110,11 +110,6 @@ flib_gui.add_handlers(handlers, function(e, handler)
   handler(self, e)
 end)
 
-function change_group_gui.init()
-  --- @type table<uint, ChangeGroupGui>
-  global.change_group_guis = {}
-end
-
 --- @param player LuaPlayer
 --- @param train LuaTrain
 function change_group_gui.build(player, train)
@@ -271,6 +266,46 @@ function change_group_gui.get(player_index)
   if pgui and pgui.elems.tgps_change_group_window.valid then
     return pgui
   end
+end
+
+-- EVENTS
+
+--- @param e EventData.on_gui_closed
+local function on_gui_closed(e)
+  if e.gui_type == defines.gui_type.entity and change_group_gui.destroy(e.player_index) then
+    game.get_player(e.player_index).opened = e.entity
+  end
+end
+
+--- @param e on_se_train_teleported
+local function on_se_elevator_teleport_started(e)
+  -- XXX: on_gui_closed isn't raised when a train starts going through an elevator
+  for _, gui_data in pairs(global.change_group_guis) do
+    local train = gui_data.train
+    if train.valid and train.id == e.old_train_id_1 then
+      change_group_gui.destroy(gui_data.player.index)
+    end
+  end
+end
+
+function change_group_gui.on_init()
+  --- @type table<uint, ChangeGroupGui>
+  global.change_group_guis = {}
+end
+
+change_group_gui.events = {
+  [defines.events.on_gui_closed] = on_gui_closed,
+}
+
+change_group_gui.add_remote_interface = function()
+  if
+    not script.active_mods["space-exploration"]
+    or not remote.interfaces["space-exploration"]["get_on_train_teleport_started_event"]
+  then
+    return
+  end
+  local started_event = remote.call("space-exploration", "get_on_train_teleport_started_event")
+  change_group_gui.events[started_event] = on_se_elevator_teleport_started
 end
 
 return change_group_gui

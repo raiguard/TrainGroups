@@ -58,58 +58,15 @@ local function get_schedule_string(records)
   return table.concat(out, " → ")
 end
 
---- @class GroupsMod
-local groups = {}
-
-function groups.init()
-  --- @type table<number, table<string, GroupData?>>
-  global.groups = {}
-  --- @type table<number, boolean>
-  global.to_delete = {}
-  --- @type table<number, TrainData?>
-  global.trains = {}
-end
-
 --- @param force LuaForce
-function groups.init_force(force)
+local function init_force(force)
   --- @type table<string, GroupData>
   global.groups[force.index] = {}
 end
 
---- @param train LuaTrain
---- @param group string
---- @param ignore_schedule boolean?
---- @return TrainData?
-function groups.add_train(train, group, ignore_schedule)
-  local train_id = train.id
-  if global.trains[train_id] then
-    LOG("NOT ADDING TRAIN, DUPLICATE: [" .. train_id .. "]")
-    return
-  end
-  LOG("ADD TRAIN: [" .. train.id .. "]")
-
-  --- @type TrainData
-  local train_data = {
-    force = train.carriages[1].force.index,
-    id = train_id,
-    train = train,
-    ignore_schedule = ignore_schedule or false,
-  }
-  global.trains[train_id] = train_data
-
-  groups.change_train_group(global.trains[train_id], group)
-end
-
---- @param train_data TrainData
-function groups.remove_train(train_data)
-  LOG("REMOVE TRAIN: [" .. train_data.id .. "]")
-  groups.change_train_group(train_data)
-  global.trains[train_data.id] = nil
-end
-
 --- @param train_data TrainData
 --- @param new_group? string
-function groups.change_train_group(train_data, new_group)
+local function change_train_group(train_data, new_group)
   -- Remove from old group
   local old_group = train_data.group
   LOG("CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]")
@@ -166,10 +123,41 @@ function groups.change_train_group(train_data, new_group)
   end
 end
 
+--- @param train LuaTrain
+--- @param group string
+--- @param ignore_schedule boolean?
+--- @return TrainData?
+local function add_train(train, group, ignore_schedule)
+  local train_id = train.id
+  if global.trains[train_id] then
+    LOG("NOT ADDING TRAIN, DUPLICATE: [" .. train_id .. "]")
+    return
+  end
+  LOG("ADD TRAIN: [" .. train.id .. "]")
+
+  --- @type TrainData
+  local train_data = {
+    force = train.carriages[1].force.index,
+    id = train_id,
+    train = train,
+    ignore_schedule = ignore_schedule or false,
+  }
+  global.trains[train_id] = train_data
+
+  change_train_group(global.trains[train_id], group)
+end
+
+--- @param train_data TrainData
+local function remove_train(train_data)
+  LOG("REMOVE TRAIN: [" .. train_data.id .. "]")
+  change_train_group(train_data)
+  global.trains[train_data.id] = nil
+end
+
 --- @param force_index number
 --- @param current_name string
 --- @param new_name string
-function groups.rename_group(force_index, current_name, new_name)
+local function rename_group(force_index, current_name, new_name)
   local group_data = global.groups[force_index][current_name]
   if not group_data then
     return
@@ -180,7 +168,7 @@ function groups.rename_group(force_index, current_name, new_name)
   if new_group_data then
     -- Merge with existing group
     for _, train_data in pairs(group_data.trains) do
-      groups.change_train_group(train_data, new_name)
+      change_train_group(train_data, new_name)
     end
   else
     -- Rename group
@@ -195,21 +183,21 @@ end
 
 --- @param force_index number
 --- @param group string
-function groups.remove_group(force_index, group)
+local function remove_group(force_index, group)
   local group_data = global.groups[force_index][group]
   if not group_data then
     return
   end
 
   for _, train_data in pairs(group_data.trains) do
-    groups.remove_train(train_data)
+    remove_train(train_data)
   end
 end
 
 --- @param force_groups table<string, GroupData?>
 --- @param old_name string
 --- @param new_name string
-function groups.rename_station(force_groups, old_name, new_name)
+local function rename_station(force_groups, old_name, new_name)
   for _, group_data in pairs(force_groups) do
     local schedule = group_data.schedule
     if schedule then
@@ -225,7 +213,7 @@ end
 --- @param train LuaTrain
 --- @param old_id_1 uint?
 --- @param old_id_2 uint?
-function groups.migrate_trains(train, old_id_1, old_id_2)
+local function migrate_trains(train, old_id_1, old_id_2)
   LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
   local added = false
   local schedule = train.schedule
@@ -243,7 +231,7 @@ function groups.migrate_trains(train, old_id_1, old_id_2)
         )
       then
         added = true
-        groups.add_train(train, train_data.group, train_data.ignore_schedule)
+        add_train(train, train_data.group, train_data.ignore_schedule)
       end
       global.to_delete[train_data.id] = true
     end
@@ -251,7 +239,7 @@ function groups.migrate_trains(train, old_id_1, old_id_2)
 end
 
 --- @param train LuaTrain
-function groups.update_group_schedule(train)
+local function update_group_schedule(train)
   local train_data = global.trains[train.id]
   if not train_data or train_data.ignore_schedule then
     return
@@ -295,12 +283,12 @@ function groups.update_group_schedule(train)
   -- Remove all invalid trains
   for _, invalid_train_data in pairs(to_remove) do
     LOG("FOUND INVALID TRAIN: [" .. invalid_train_data.id .. "]")
-    groups.remove_train(invalid_train_data)
+    remove_train(invalid_train_data)
   end
 end
 
 --- @param force_index uint
-function groups.auto_create(force_index)
+local function auto_create_groups(force_index)
   local force = game.forces[force_index]
   for _, surface in pairs(game.surfaces) do
     for _, train in pairs(surface.get_trains(force)) do
@@ -312,7 +300,7 @@ function groups.auto_create(force_index)
         goto continue
       end
       local group_name = get_schedule_string(schedule.records)
-      groups.add_train(train, group_name, true)
+      add_train(train, group_name, true)
       local train_data = global.trains[train.id]
       if not train_data then
         goto continue
@@ -322,5 +310,273 @@ function groups.auto_create(force_index)
     end
   end
 end
+
+--- @param e EventData.on_force_created
+local function on_force_created(e)
+  init_force(e.force)
+end
+
+--- @param e EntityBuiltEvent
+local function on_entity_built(e)
+  local tags = e.tags
+  if not tags or not tags.train_group then
+    return
+  end
+
+  local entity = e.created_entity or e.entity
+  if not entity or not entity.valid then
+    return
+  end
+
+  add_train(entity.train, tags.train_group --[[@as string?]])
+end
+
+--- @param e EventData.on_entity_cloned
+local function on_entity_cloned(e)
+  local source = e.source
+  local destination = e.destination
+
+  local source_train = source.train
+  local destination_train = destination.train
+  if not source_train or not destination_train then
+    return
+  end
+
+  local source_train_data = global.trains[source_train.id]
+  if not source_train_data then
+    return
+  end
+  if global.trains[destination_train.id] then
+    return
+  end
+
+  add_train(destination_train, source_train_data.group)
+end
+
+--- @param e EventData.on_pre_entity_settings_pasted
+local function on_pre_entity_settings_pasted(e)
+  if e.source.type == "locomotive" and e.destination.type == "locomotive" then
+    local destination_train = e.destination.train --[[@as LuaTrain]]
+    local destination_train_data = global.trains[destination_train.id]
+    if destination_train_data then
+      -- Add a flag to ignore the schedule change for the destination train
+      destination_train_data.ignore_schedule = true
+    end
+  end
+end
+
+--- @param e EventData.on_entity_settings_pasted
+local function on_entity_settings_pasted(e)
+  local source = e.source
+  local destination = e.destination
+
+  if source.type == "locomotive" and destination.type == "locomotive" then
+    LOG("SETTINGS PASTED")
+    local source_train = source.train --[[@as LuaTrain]]
+    local destination_train = destination.train --[[@as LuaTrain]]
+    local source_train_data = global.trains[source_train.id]
+    local destination_train_data = global.trains[destination_train.id]
+
+    if not source_train_data and destination_train_data then
+      remove_train(destination_train_data)
+    elseif source_train_data and not destination_train_data then
+      add_train(destination_train, source_train_data.group)
+    elseif source_train_data and destination_train_data then
+      change_train_group(destination_train_data, source_train_data.group)
+      destination_train_data.ignore_schedule = false
+    end
+  end
+end
+
+--- @param e EntityDestroyedEvent
+local function on_entity_destroyed(e)
+  local train = e.entity.train
+  if not train then
+    return
+  end
+  LOG(string.upper(table.find(defines.events, e.name)) .. ": [" .. train.id .. "]")
+  local train_data = global.trains[train.id]
+  if not train_data then
+    return
+  end
+  -- If this is the last rolling stock in the train
+  if #train.carriages == 1 then
+    remove_train(train_data)
+  end
+end
+
+local function on_tick()
+  for train_id in pairs(global.to_delete) do
+    local train_data = global.trains[train_id]
+    if train_data then
+      remove_train(train_data)
+    end
+  end
+  global.to_delete = {}
+end
+
+--- @param e EventData.on_entity_renamed
+local function on_entity_renamed(e)
+  local entity = e.entity
+  if entity.type ~= "train-stop" then
+    return
+  end
+  local force_groups = global.groups[entity.force.index]
+  if not force_groups then
+    return
+  end
+  local force = entity.force
+  if #game.get_train_stops({ force = force, name = e.old_name }) == 0 then
+    rename_station(force_groups, e.old_name, entity.backer_name)
+  end
+end
+
+--- @param e EventData.on_train_created
+local function on_train_created(e)
+  if e.old_train_id_1 or e.old_train_id_2 then
+    migrate_trains(e.train, e.old_train_id_1, e.old_train_id_2)
+  end
+end
+
+--- @param e on_se_train_teleported
+local function on_se_elevator_teleport_started(e)
+  LOG("ON_TRAIN_TELEPORT_STARTED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
+  local old_train_data = global.trains[e.old_train_id_1]
+  if old_train_data then
+    old_train_data.ignore_schedule = true
+    migrate_trains(e.train, e.old_train_id_1)
+  end
+end
+
+--- @param e on_se_train_teleported
+local function on_se_elevator_teleport_finished(e)
+  LOG("ON_TRAIN_TELEPORT_FINISHED: [" .. (e.old_train_id_1 or "") .. "] -> [" .. e.train.id .. "]")
+  local train_data = global.trains[e.train.id]
+  if train_data then
+    train_data.ignore_schedule = false
+  end
+end
+
+--- @param e EventData.on_train_schedule_changed
+local function on_train_schedule_changed(e)
+  LOG("ON_TRAIN_SCHEDULE_CHANGED: [" .. e.train.id .. "]")
+  -- Only update if a player intentionally changed something
+  if e.player_index then
+    update_group_schedule(e.train)
+  end
+end
+
+local rolling_stock_types = {
+  ["locomotive"] = true,
+  ["cargo-wagon"] = true,
+  ["fluid-wagon"] = true,
+  ["artillery-wagon"] = true,
+}
+
+--- @param e EventData.on_player_setup_blueprint
+local function on_player_setup_blueprint(e)
+  local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
+
+  -- Get blueprint
+  local bp = player.blueprint_to_setup
+  if not bp or not bp.valid_for_read then
+    bp = player.cursor_stack
+    if not bp then
+      return
+    end
+    if bp.type == "blueprint-book" then
+      local item_inventory = bp.get_inventory(defines.inventory.item_main)
+      if item_inventory then
+        bp = item_inventory[bp.active_index]
+      else
+        return
+      end
+    end
+  end
+
+  local entities = bp.get_blueprint_entities()
+  if not entities or #entities == 0 then
+    return
+  end
+
+  local set = false
+  for _, bp_entity in pairs(entities) do
+    local prototype = game.entity_prototypes[bp_entity.name]
+    if prototype and rolling_stock_types[prototype.type] then
+      local entity = e.surface.find_entities_filtered({ name = bp_entity.name, position = bp_entity.position })[1]
+      if entity then
+        local train = entity.train
+        if train and train.valid then
+          local train_data = global.trains[train.id]
+          if train_data then
+            set = true
+            bp_entity.tags = bp_entity.tags or {}
+            bp_entity.tags.train_group = train_data.group
+          end
+        end
+      end
+    end
+  end
+
+  if set then
+    bp.set_blueprint_entities(entities)
+  end
+end
+
+--- @class GroupsMod
+local groups = {}
+
+groups.on_init = function()
+  --- @type table<number, table<string, GroupData?>>
+  global.groups = {}
+  --- @type table<number, boolean>
+  global.to_delete = {}
+  --- @type table<number, TrainData?>
+  global.trains = {}
+
+  for _, force in pairs(game.forces) do
+    init_force(force)
+  end
+end
+
+groups.add_remote_interface = function()
+  if
+    not script.active_mods["space-exploration"]
+    or not remote.interfaces["space-exploration"]["get_on_train_teleport_started_event"]
+  then
+    return
+  end
+  local started_event = remote.call("space-exploration", "get_on_train_teleport_started_event")
+  groups.events[started_event] = on_se_elevator_teleport_started
+  local finished_event = remote.call("space-exploration", "get_on_train_teleport_finished_event")
+  groups.events[finished_event] = on_se_elevator_teleport_finished
+end
+
+groups.events = {
+  [defines.events.on_built_entity] = on_entity_built,
+  [defines.events.on_entity_cloned] = on_entity_cloned,
+  [defines.events.on_entity_died] = on_entity_destroyed,
+  [defines.events.on_entity_renamed] = on_entity_renamed,
+  [defines.events.on_entity_settings_pasted] = on_entity_settings_pasted,
+  [defines.events.on_force_created] = on_force_created,
+  [defines.events.on_player_mined_entity] = on_entity_destroyed,
+  [defines.events.on_player_setup_blueprint] = on_player_setup_blueprint,
+  [defines.events.on_pre_entity_settings_pasted] = on_pre_entity_settings_pasted,
+  [defines.events.on_robot_built_entity] = on_entity_built,
+  [defines.events.on_robot_mined_entity] = on_entity_destroyed,
+  [defines.events.on_tick] = on_tick,
+  [defines.events.on_train_created] = on_train_created,
+  [defines.events.on_train_schedule_changed] = on_train_schedule_changed,
+  [defines.events.script_raised_built] = on_entity_built,
+  [defines.events.script_raised_destroy] = on_entity_destroyed,
+  [defines.events.script_raised_revive] = on_entity_built,
+}
+
+groups.add_train = add_train
+groups.auto_create_groups = auto_create_groups
+groups.change_train_group = change_train_group
+groups.remove_group = remove_group
+groups.remove_train = remove_train
+groups.rename_group = rename_group
 
 return groups
