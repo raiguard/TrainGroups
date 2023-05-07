@@ -9,13 +9,90 @@ local groups = require("__TrainGroups__/scripts/groups")
 --- @field scroll_pane LuaGuiElement
 --- @field no_groups_flow LuaGuiElement
 
---- @class OverviewGuiMod
-local overview_gui = {}
---- @class OverviewGuiHandlers
-local handlers
+local update
+
+--- @param e EventData.on_gui_elem_changed
+local function add_icon(_, _, e)
+  local button = e.element
+  local signal = button.elem_value
+  if signal and signal.name ~= "tgps-signal-icon-selector" then
+    local textfield = button.parent.textfield or button.parent.search_textfield --[[@as LuaGuiElement]]
+    local type = signal.type == "virtual" and "virtual-signal" or signal.type
+    textfield.text = textfield.text .. "[img=" .. type .. "/" .. signal.name .. "]"
+    textfield.select(#textfield.text + 1, #textfield.text)
+    textfield.focus()
+  end
+  button.elem_value = { type = "virtual", name = "tgps-signal-icon-selector" }
+end
 
 --- @param self OverviewGui
-local function refresh(self)
+local function auto_create_groups(self)
+  groups.auto_create_groups(self.force_index)
+  update(self)
+end
+
+--- @param group_data GroupData
+--- @param e EventData.on_gui_click
+local function cancel_rename(_, group_data, e)
+  e.element.parent.visible = false
+  e.element.parent.textfield.text = group_data.name
+  e.element.parent.parent.standard.visible = true
+end
+
+--- @param self OverviewGui
+local function filter(self)
+  local text = self.elems.search_textfield.text
+  for _, elem in pairs(self.elems.scroll_pane.children) do
+    elem.visible = not not string.find(elem.name, text, nil, true)
+  end
+end
+
+--- @param self OverviewGui
+--- @param group_data GroupData
+local function edit_schedule(self, group_data)
+  local _, train_data = next(group_data.trains)
+  if not train_data then
+    return
+  end
+  self.player.opened = flib_train.get_main_locomotive(train_data.train)
+end
+
+--- @param self OverviewGui
+--- @param group_data GroupData
+--- @param e EventData.on_gui_click
+local function remove_group(self, group_data, e)
+  local tags = e.element.tags
+  if game.ticks_played - (tags.last_click or 0) > 30 then
+    self.player.create_local_flying_text({ text = { "message.tgps-click-again-to-confirm" }, create_at_cursor = true })
+    tags.last_click = game.ticks_played
+    e.element.tags = tags
+    return
+  end
+  groups.remove_group(self.force_index, group_data.name)
+  update(self)
+end
+
+--- @param self OverviewGui
+--- @param e EventData.on_gui_click
+local function rename_group(self, group_data, e)
+  groups.rename_group(self.force_index, group_data.name, e.element.parent.textfield.text)
+  update(self)
+end
+
+--- @param e EventData.on_gui_click
+local function start_rename(_, _, e)
+  local rename_flow = e.element.parent.parent.rename
+  if not rename_flow then
+    return
+  end
+  e.element.parent.visible = false
+  rename_flow.visible = true
+  rename_flow.textfield.focus()
+  rename_flow.textfield.select_all()
+end
+
+--- @param self OverviewGui
+function update(self)
   -- List box
   --- @type GuiElemDef[]
   local items = {}
@@ -36,14 +113,14 @@ local function refresh(self)
           caption = caption,
           tooltip = { "", "[font=default-semibold]", caption, "[/font]\n", { "gui.tgps-click-to-edit-schedule" } },
           tags = { group = name },
-          handler = handlers.ov_edit_schedule,
+          handler = edit_schedule,
         },
         {
           type = "sprite-button",
           style = "tool_button",
           sprite = "utility/rename_icon_normal",
           tooltip = { "gui.tgps-rename-group" },
-          handler = handlers.ov_start_rename,
+          handler = start_rename,
         },
         {
           type = "sprite-button",
@@ -51,7 +128,7 @@ local function refresh(self)
           sprite = "utility/trash",
           tooltip = { "gui.tgps-remove-group" },
           tags = { group = name },
-          handler = handlers.ov_remove_group,
+          handler = remove_group,
         },
       },
       {
@@ -66,7 +143,7 @@ local function refresh(self)
           style_mods = { horizontally_stretchable = true },
           text = name,
           tags = { group = name },
-          handler = { [defines.events.on_gui_confirmed] = handlers.ov_rename_group },
+          handler = { [defines.events.on_gui_confirmed] = rename_group },
         },
         {
           type = "choose-elem-button",
@@ -76,7 +153,7 @@ local function refresh(self)
           tooltip = { "gui.tgps-choose-icon" },
           elem_type = "signal",
           signal = { type = "virtual", name = "tgps-signal-icon-selector" },
-          handler = { [defines.events.on_gui_elem_changed] = handlers.ov_add_icon },
+          handler = { [defines.events.on_gui_elem_changed] = add_icon },
         },
         {
           type = "sprite-button",
@@ -84,7 +161,7 @@ local function refresh(self)
           sprite = "utility/enter",
           tooltip = { "gui.confirm" },
           tags = { group = name },
-          handler = handlers.ov_rename_group,
+          handler = rename_group,
         },
       },
     })
@@ -99,114 +176,29 @@ local function refresh(self)
     scroll_pane.visible = true
     no_groups_flow.visible = false
     flib_gui.add(scroll_pane, items)
-    handlers.ov_filter(self)
+    filter(self)
   else
     scroll_pane.visible = false
     no_groups_flow.visible = true
   end
 end
 
---- @class OverviewGuiHandlers
-handlers = {
-  --- @param e EventData.on_gui_elem_changed
-  ov_add_icon = function(_, _, e)
-    local button = e.element
-    local signal = button.elem_value
-    if signal and signal.name ~= "tgps-signal-icon-selector" then
-      local textfield = button.parent.textfield or button.parent.search_textfield --[[@as LuaGuiElement]]
-      local type = signal.type == "virtual" and "virtual-signal" or signal.type
-      textfield.text = textfield.text .. "[img=" .. type .. "/" .. signal.name .. "]"
-      textfield.select(#textfield.text + 1, #textfield.text)
-      textfield.focus()
-    end
-    button.elem_value = { type = "virtual", name = "tgps-signal-icon-selector" }
-  end,
-
-  --- @param self OverviewGui
-  ov_auto_create_groups = function(self)
-    groups.auto_create_groups(self.force_index)
-    refresh(self)
-  end,
-
-  --- @param group_data GroupData
-  --- @param e EventData.on_gui_click
-  ov_cancel_rename = function(_, group_data, e)
-    e.element.parent.visible = false
-    e.element.parent.textfield.text = group_data.name
-    e.element.parent.parent.standard.visible = true
-  end,
-
-  --- @param self OverviewGui
-  ov_filter = function(self)
-    local text = self.elems.search_textfield.text
-    for _, elem in pairs(self.elems.scroll_pane.children) do
-      elem.visible = not not string.find(elem.name, text, nil, true)
-    end
-  end,
-
-  --- @param self OverviewGui
-  --- @param group_data GroupData
-  ov_edit_schedule = function(self, group_data)
-    local _, train_data = next(group_data.trains)
-    if not train_data then
-      return
-    end
-    self.player.opened = flib_train.get_main_locomotive(train_data.train)
-  end,
-
-  --- @param self OverviewGui
-  --- @param group_data GroupData
-  --- @param e EventData.on_gui_click
-  ov_remove_group = function(self, group_data, e)
-    local tags = e.element.tags
-    if game.ticks_played - (tags.last_click or 0) > 30 then
-      self.player.create_local_flying_text({ text = { "message.tgps-click-again-to-confirm" }, create_at_cursor = true })
-      tags.last_click = game.ticks_played
-      e.element.tags = tags
-      return
-    end
-    groups.remove_group(self.force_index, group_data.name)
-    refresh(self)
-  end,
-
-  --- @param self OverviewGui
-  --- @param e EventData.on_gui_click
-  ov_rename_group = function(self, group_data, e)
-    groups.rename_group(self.force_index, group_data.name, e.element.parent.textfield.text)
-    refresh(self)
-  end,
-
-  --- @param e EventData.on_gui_click
-  ov_start_rename = function(_, _, e)
-    local rename_flow = e.element.parent.parent.rename
-    if not rename_flow then
-      return
-    end
-    e.element.parent.visible = false
-    rename_flow.visible = true
-    rename_flow.textfield.focus()
-    rename_flow.textfield.select_all()
-  end,
-}
-
-flib_gui.add_handlers(handlers, function(e, handler)
-  local self = overview_gui.get(e.player_index)
+--- @param player_index uint
+local function destroy_gui(player_index)
+  local self = global.overview_guis[player_index]
   if not self then
     return
   end
-  local group, group_data = e.element.tags.group, nil
-  if group then
-    group_data = global.groups[self.force_index][group]
-    if not group_data then
-      return
-    end
+  local window = self.elems.tgps_overview_window
+  if window and window.valid then
+    window.destroy()
   end
-  handler(self, group_data, e)
-end)
+  global.overview_guis[player_index] = nil
+end
 
 --- @param player LuaPlayer
-function overview_gui.build(player)
-  overview_gui.destroy(player.index) -- Just in case
+local function build_gui(player)
+  destroy_gui(player.index) -- Just in case
 
   --- @type OverviewGuiElems
   local elems = flib_gui.add(player.gui.relative, {
@@ -231,7 +223,7 @@ function overview_gui.build(player)
           name = "search_textfield",
           style = "flib_widthless_textfield",
           style_mods = { horizontally_stretchable = true },
-          handler = { [defines.events.on_gui_text_changed] = handlers.ov_filter },
+          handler = { [defines.events.on_gui_text_changed] = filter },
         },
         {
           type = "choose-elem-button",
@@ -241,7 +233,7 @@ function overview_gui.build(player)
           tooltip = { "gui.tgps-choose-icon" },
           elem_type = "signal",
           signal = { type = "virtual", name = "tgps-signal-icon-selector" },
-          handler = { [defines.events.on_gui_elem_changed] = handlers.ov_add_icon },
+          handler = { [defines.events.on_gui_elem_changed] = add_icon },
         },
       },
       {
@@ -265,7 +257,7 @@ function overview_gui.build(player)
           type = "button",
           caption = { "gui.tgps-auto-create-groups" },
           tooltip = { "gui.tgps-auto-create-groups-tooltip" },
-          handler = handlers.ov_auto_create_groups,
+          handler = auto_create_groups,
         },
       },
     },
@@ -278,57 +270,23 @@ function overview_gui.build(player)
     player = player,
   }
   global.overview_guis[player.index] = self
-  refresh(self)
-end
-
---- @param player_index uint
-function overview_gui.destroy(player_index)
-  local self = overview_gui.get(player_index)
-  if not self then
-    return
-  end
-  local window = self.elems.tgps_overview_window
-  if window and window.valid then
-    window.destroy()
-  end
-  global.overview_guis[player_index] = nil
-end
-
---- @param player_index uint
-function overview_gui.get(player_index)
-  local gui = global.overview_guis[player_index]
-  if gui and gui.elems.tgps_overview_window.valid then
-    return gui
-  end
-end
-
---- @param player_index uint
-function overview_gui.set_height(player_index)
-  local self = overview_gui.get(player_index)
-  if self then
-    refresh(self)
-  end
+  update(self)
 end
 
 --- @param e EventData.on_gui_opened
 local function on_gui_opened(e)
-  if e.gui_type == defines.gui_type.trains then
-    local player = game.get_player(e.player_index) --[[@as LuaPlayer]]
-    overview_gui.build(player)
+  if e.gui_type ~= defines.gui_type.trains then
+    return
   end
+  local player = game.get_player(e.player_index)
+  if not player then
+    return
+  end
+  build_gui(player)
 end
 
---- @param e EventData.on_gui_closed
-local function on_gui_closed(e)
-  if e.gui_type == defines.gui_type.trains then
-    overview_gui.destroy(e.player_index)
-  end
-end
-
---- @param e EventData.on_player_display_resolution_changed|EventData.on_player_display_scale_changed
-local function on_player_display_settings_changed(e)
-  overview_gui.set_height(e.player_index)
-end
+--- @class OverviewGuiMod
+local overview_gui = {}
 
 function overview_gui.on_init()
   --- @type table<uint, OverviewGui>
@@ -336,10 +294,31 @@ function overview_gui.on_init()
 end
 
 overview_gui.events = {
-  [defines.events.on_gui_closed] = on_gui_closed,
   [defines.events.on_gui_opened] = on_gui_opened,
-  [defines.events.on_player_display_resolution_changed] = on_player_display_settings_changed,
-  [defines.events.on_player_display_scale_changed] = on_player_display_settings_changed,
 }
+
+flib_gui.add_handlers({
+  ov_add_icon = add_icon,
+  ov_auto_create_groups = auto_create_groups,
+  ov_cancel_rename = cancel_rename,
+  ov_filter = filter,
+  ov_edit_schedule = edit_schedule,
+  ov_remove_group = remove_group,
+  ov_rename_group = rename_group,
+  ov_start_rename = start_rename,
+}, function(e, handler)
+  local self = global.overview_guis[e.player_index]
+  if not self then
+    return
+  end
+  local group, group_data = e.element.tags.group, nil
+  if group then
+    group_data = global.groups[self.force_index][group]
+    if not group_data then
+      return
+    end
+  end
+  handler(self, group_data, e)
+end)
 
 return overview_gui

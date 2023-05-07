@@ -2,18 +2,11 @@ local handler = require("__core__/lualib/event_handler")
 
 handler.add_lib(require("__flib__/gui-lite"))
 
-handler.add_lib(require("__TrainGroups__/scripts/train-gui"))
 handler.add_lib(require("__TrainGroups__/scripts/change-group-gui"))
 handler.add_lib(require("__TrainGroups__/scripts/groups"))
 handler.add_lib(require("__TrainGroups__/scripts/migrations"))
 handler.add_lib(require("__TrainGroups__/scripts/overview-gui"))
-
-DEBUG = false
-function LOG(msg)
-  if __DebugAdapter or DEBUG then
-    log({ "", "[" .. game.tick .. "] ", msg })
-  end
-end
+handler.add_lib(require("__TrainGroups__/scripts/train-gui"))
 
 --- @diagnostic disable
 local rolling_stock_filter = { { filter = "rolling-stock" } }

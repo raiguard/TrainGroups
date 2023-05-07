@@ -1,5 +1,9 @@
 local migration = require("__flib__/migration")
 
+local change_group_gui = require("__TrainGroups__/scripts/change-group-gui")
+local overview_gui = require("__TrainGroups__/scripts/overview-gui")
+local train_gui = require("__TrainGroups__/scripts/train-gui")
+
 local function on_configuration_changed(e)
   migration.on_config_changed(e, {
     ["1.0.4"] = function()
@@ -57,9 +61,9 @@ local function on_configuration_changed(e)
         end
       end
       -- Init new GUIs
-      change_group_gui.init()
-      overview_gui.init()
-      train_gui.init()
+      change_group_gui.on_init()
+      overview_gui.on_init()
+      train_gui.on_init()
     end,
     ["1.3.2"] = function()
       -- Ensure that all trains can sync schedules

@@ -1,5 +1,7 @@
 local table = require("__flib__/table")
 
+local util = require("__TrainGroups__/scripts/util")
+
 --- @class GroupData
 --- @field name string
 --- @field schedule TrainScheduleRecord[]?
@@ -69,7 +71,9 @@ end
 local function change_train_group(train_data, new_group)
   -- Remove from old group
   local old_group = train_data.group
-  LOG("CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]")
+  util.log(
+    "CHANGE TRAIN GROUP: [" .. train_data.id .. "] | [" .. (old_group or "") .. "] -> [" .. (new_group or "") .. "]"
+  )
   if old_group then
     local group_data = global.groups[train_data.force][old_group]
     -- While this is never supposed to be nil, someone did get a crash with it
@@ -130,10 +134,10 @@ end
 local function add_train(train, group, ignore_schedule)
   local train_id = train.id
   if global.trains[train_id] then
-    LOG("NOT ADDING TRAIN, DUPLICATE: [" .. train_id .. "]")
+    util.log("NOT ADDING TRAIN, DUPLICATE: [" .. train_id .. "]")
     return
   end
-  LOG("ADD TRAIN: [" .. train.id .. "]")
+  util.log("ADD TRAIN: [" .. train.id .. "]")
 
   --- @type TrainData
   local train_data = {
@@ -149,7 +153,7 @@ end
 
 --- @param train_data TrainData
 local function remove_train(train_data)
-  LOG("REMOVE TRAIN: [" .. train_data.id .. "]")
+  util.log("REMOVE TRAIN: [" .. train_data.id .. "]")
   change_train_group(train_data)
   global.trains[train_data.id] = nil
 end
@@ -214,7 +218,7 @@ end
 --- @param old_id_1 uint?
 --- @param old_id_2 uint?
 local function migrate_trains(train, old_id_1, old_id_2)
-  LOG("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
+  util.log("MIGRATE TRAIN: [" .. train.id .. "] <- [" .. (old_id_1 or "nil") .. "] [" .. (old_id_2 or "nil") .. "]")
   local added = false
   local schedule = train.schedule
   for _, id in pairs({ old_id_1, old_id_2 }) do
@@ -251,7 +255,7 @@ local function update_group_schedule(train)
   end
 
   -- Update stored schedule for the group
-  LOG("UPDATE SCHEDULE: [" .. train_data.group .. "]")
+  util.log("UPDATE SCHEDULE: [" .. train_data.group .. "]")
   local records = train.schedule and sanitize_records(train.schedule.records)
   -- Don't continue if the schedule hasn't actually changed
   if records and group_data.schedule and table.deep_compare(group_data.schedule, records) then
@@ -282,7 +286,7 @@ local function update_group_schedule(train)
 
   -- Remove all invalid trains
   for _, invalid_train_data in pairs(to_remove) do
-    LOG("FOUND INVALID TRAIN: [" .. invalid_train_data.id .. "]")
+    util.log("FOUND INVALID TRAIN: [" .. invalid_train_data.id .. "]")
     remove_train(invalid_train_data)
   end
 end
@@ -371,7 +375,7 @@ local function on_entity_settings_pasted(e)
   local destination = e.destination
 
   if source.type == "locomotive" and destination.type == "locomotive" then
-    LOG("SETTINGS PASTED")
+    util.log("SETTINGS PASTED")
     local source_train = source.train --[[@as LuaTrain]]
     local destination_train = destination.train --[[@as LuaTrain]]
     local source_train_data = global.trains[source_train.id]
@@ -394,7 +398,7 @@ local function on_entity_destroyed(e)
   if not train then
     return
   end
-  LOG(string.upper(table.find(defines.events, e.name)) .. ": [" .. train.id .. "]")
+  util.log(string.upper(table.find(defines.events, e.name)) .. ": [" .. train.id .. "]")
   local train_data = global.trains[train.id]
   if not train_data then
     return
@@ -440,7 +444,7 @@ end
 
 --- @param e on_se_train_teleported
 local function on_se_elevator_teleport_started(e)
-  LOG("ON_TRAIN_TELEPORT_STARTED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
+  util.log("ON_TRAIN_TELEPORT_STARTED: [" .. e.old_train_id_1 .. "] -> [" .. e.train.id .. "]")
   local old_train_data = global.trains[e.old_train_id_1]
   if old_train_data then
     old_train_data.ignore_schedule = true
@@ -450,7 +454,7 @@ end
 
 --- @param e on_se_train_teleported
 local function on_se_elevator_teleport_finished(e)
-  LOG("ON_TRAIN_TELEPORT_FINISHED: [" .. (e.old_train_id_1 or "") .. "] -> [" .. e.train.id .. "]")
+  util.log("ON_TRAIN_TELEPORT_FINISHED: [" .. (e.old_train_id_1 or "") .. "] -> [" .. e.train.id .. "]")
   local train_data = global.trains[e.train.id]
   if train_data then
     train_data.ignore_schedule = false
@@ -459,7 +463,7 @@ end
 
 --- @param e EventData.on_train_schedule_changed
 local function on_train_schedule_changed(e)
-  LOG("ON_TRAIN_SCHEDULE_CHANGED: [" .. e.train.id .. "]")
+  util.log("ON_TRAIN_SCHEDULE_CHANGED: [" .. e.train.id .. "]")
   -- Only update if a player intentionally changed something
   if e.player_index then
     update_group_schedule(e.train)

@@ -1,36 +1,16 @@
 local flib_gui = require("__flib__/gui-lite")
 
 local change_group_gui = require("__TrainGroups__/scripts/change-group-gui")
+local util = require("__TrainGroups__/scripts/util")
 
---- @class TrainGuiModule
-local train_gui = {}
---- @class TrainGuiHandlers
-local handlers = {
-  --- @param self TrainGui
-  tr_open_change_group = function(self)
-    local cg_gui = change_group_gui.get(self.player.index)
-    if cg_gui then
-      cg_gui.elems.tgps_change_group_window.bring_to_front()
-    else
-      change_group_gui.build(self.player, self.train)
-    end
-  end,
-}
-
-flib_gui.add_handlers(handlers, function(e, handler)
-  local self = train_gui.get(e.player_index)
-  if self then
-    handler(self)
+--- @param self TrainGui
+--- @param train LuaTrain?
+local function update(self, train)
+  if train then
+    self.train = train
   end
-end)
-
---- @param player LuaPlayer
---- @param train LuaTrain
-function train_gui.build(player, train)
-  train_gui.destroy(player.index) -- Just in case
-
   local caption = { "gui.tgps-no-group-assigned" }
-  local train_data = global.trains[train.id]
+  local train_data = global.trains[self.train.id]
   if train_data then
     local group_data = global.groups[train_data.force][train_data.group]
     if group_data then
@@ -42,8 +22,34 @@ function train_gui.build(player, train)
       }
     end
   end
+  self.button.caption = caption
+end
 
-  local _, window = flib_gui.add(player.gui.relative, {
+--- @param self TrainGui
+local function open_change_group_gui(self)
+  change_group_gui.open(self.player, self.train)
+end
+
+--- @param player_index uint
+local function destroy_gui(player_index)
+  local self = global.train_guis[player_index]
+  if not self then
+    return
+  end
+  local window = self.window
+  if window and window.valid then
+    window.destroy()
+  end
+  global.train_guis[self.player.index] = nil
+end
+
+--- @param player LuaPlayer
+--- @param train LuaTrain
+--- @return TrainGui
+local function build_gui(player, train)
+  destroy_gui(player.index)
+
+  local elems = flib_gui.add(player.gui.relative, {
     {
       type = "frame",
       name = "tgps_train_window",
@@ -56,10 +62,10 @@ function train_gui.build(player, train)
         style = "inside_deep_frame",
         {
           type = "button",
+          name = "button",
           style = "tgps_relative_group_button",
-          caption = caption,
           tooltip = { "gui.tgps-change-train-group" },
-          handler = handlers.tr_open_change_group,
+          handler = open_change_group_gui,
         },
       },
     },
@@ -67,31 +73,21 @@ function train_gui.build(player, train)
 
   --- @class TrainGui
   local self = {
+    button = elems.button,
     player = player,
     train = train,
-    window = window,
+    window = elems.tgps_train_window,
   }
   global.train_guis[player.index] = self
+
+  return self
 end
 
---- @param player_index uint
-function train_gui.destroy(player_index)
-  local self = global.train_guis[player_index]
-  if not self then
-    return
-  end
-  local window = self.window
-  if window and window.valid then
-    window.destroy()
-  end
-  global.train_guis[self.player.index] = nil
-end
-
---- @param player_index uint
-function train_gui.get(player_index)
-  local pgui = global.train_guis[player_index]
-  if pgui and pgui.window.valid then
-    return pgui
+--- @param e on_update_train_gui
+local function on_update_train_gui(e)
+  local self = global.train_guis[e.player_index]
+  if self and self.window.valid then
+    update(self)
   end
 end
 
@@ -112,24 +108,37 @@ local function on_gui_opened(e)
   if not player then
     return
   end
-  train_gui.build(player, entity.train)
+  local self = global.train_guis[e.player_index]
+  if not self then
+    self = build_gui(player, entity.train)
+  end
+  update(self, entity.train)
 end
 
---- @param e EventData.on_gui_closed
-local function on_gui_closed(e)
-  if e.gui_type == defines.gui_type.entity then
-    train_gui.destroy(e.player_index)
-  end
-end
+--- @class TrainGuiMod
+local train_gui = {}
 
 function train_gui.on_init()
   --- @type table<uint, TrainGui>
   global.train_guis = {}
 end
 
+function train_gui.on_configuration_changed()
+  for player_index in pairs(global.train_guis) do
+    destroy_gui(player_index)
+  end
+end
+
 train_gui.events = {
-  [defines.events.on_gui_closed] = on_gui_closed,
   [defines.events.on_gui_opened] = on_gui_opened,
+  [util.update_train_gui_event] = on_update_train_gui,
 }
+
+flib_gui.add_handlers({ tr_open_change_group_gui = open_change_group_gui }, function(e, handler)
+  local self = global.train_guis[e.player_index]
+  if self then
+    handler(self)
+  end
+end)
 
 return train_gui
