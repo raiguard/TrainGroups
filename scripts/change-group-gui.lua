@@ -293,10 +293,10 @@ change_group_gui.add_remote_interface = function()
 end
 
 flib_gui.add_handlers({
-  cg_on_result_click = on_result_click,
   cg_add_icon = add_icon,
-  cg_on_confirmed = on_confirmed,
   cg_on_close_window = on_close_window,
+  cg_on_confirmed = on_confirmed,
+  cg_on_result_click = on_result_click,
   cg_update = update,
 }, function(e, handler)
   local self = global.change_group_guis[e.player_index]
