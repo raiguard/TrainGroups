@@ -583,11 +583,11 @@ remote.add_interface("TrainGroups", {
     end
     local train_data = global.trains[train.id]
     if train_data and group_name and group_name ~= train_data.group then
-      groups.change_train_group(train_data, group_name)
+      change_train_group(train_data, group_name)
     elseif train_data and not group_name then
-      groups.remove_train(train_data)
+      remove_train(train_data)
     elseif group_name and not train_data then
-      groups.add_train(train, group_name)
+      add_train(train, group_name)
     end
   end,
 })
