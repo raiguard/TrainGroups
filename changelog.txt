@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.0
 Date: ????
+  Features:
+    - Added remote interface functions for getting and setting train groups (TrainGroups::get_train_group, TrainGroups::set_train_group)
   Bugfixes:
     - Fixed relative GUIs causing annoying GUI movements when playing in multiplayer
 ---------------------------------------------------------------------------------------------------

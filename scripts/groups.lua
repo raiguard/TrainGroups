@@ -556,6 +556,42 @@ groups.add_remote_interface = function()
   groups.events[finished_event] = on_se_elevator_teleport_finished
 end
 
+remote.add_interface("TrainGroups", {
+  --- @param train_id uint
+  --- @return string?
+  get_train_group = function(train_id)
+    if not global.trains then
+      return
+    end
+    if not train_id then
+      error("Call to TrainGroups::get_train_group interface did not provide a train_id")
+    end
+    local train_data = global.trains[train_id]
+    if train_data then
+      return train_data.group
+    end
+  end,
+  --- @param train LuaTrain
+  --- @param group_name string?
+  --- @return string?
+  set_train_group = function(train, group_name)
+    if not global.trains then
+      return
+    end
+    if not train or not train.valid or train.object_name ~= "LuaTrain" then
+      error("Call to TrainGroups::set_train_group interface did not provide a valid train")
+    end
+    local train_data = global.trains[train.id]
+    if train_data and group_name and group_name ~= train_data.group then
+      groups.change_train_group(train_data, group_name)
+    elseif train_data and not group_name then
+      groups.remove_train(train_data)
+    elseif group_name and not train_data then
+      groups.add_train(train, group_name)
+    end
+  end,
+})
+
 groups.events = {
   [defines.events.on_built_entity] = on_entity_built,
   [defines.events.on_entity_cloned] = on_entity_cloned,
