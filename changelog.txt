@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.0
-Date: ????
+Date: 2023-06-04
   Features:
     - Added remote interface functions for getting and setting train groups (TrainGroups::get_train_group, TrainGroups::set_train_group)
     - Groups can be auto-created at any time, not just when there are no groups (#13)
