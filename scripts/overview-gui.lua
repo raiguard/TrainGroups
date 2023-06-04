@@ -8,6 +8,7 @@ local groups = require("__TrainGroups__/scripts/groups")
 --- @field search_textfield LuaGuiElement
 --- @field scroll_pane LuaGuiElement
 --- @field no_groups_flow LuaGuiElement
+--- @field groups_count_label LuaGuiElement
 
 local update
 
@@ -181,6 +182,7 @@ function update(self)
     scroll_pane.visible = false
     no_groups_flow.visible = true
   end
+  self.elems.groups_count_label.caption = { "gui.tgps-groups-count", #items }
 end
 
 --- @param player_index uint
@@ -244,20 +246,24 @@ local function build_gui(player)
       {
         type = "flow",
         name = "no_groups_flow",
-        style_mods = {
-          horizontal_align = "center",
-          horizontally_stretchable = true,
-          vertical_align = "center",
-          vertically_stretchable = true,
-          vertical_spacing = 12,
-        },
-        direction = "vertical",
+        style = "centering_horizontal_flow",
+        style_mods = { horizontally_stretchable = true, vertically_stretchable = true },
         { type = "label", caption = { "gui.tgps-no-groups-message" } },
+      },
+      {
+        type = "frame",
+        style = "subfooter_frame",
         {
-          type = "button",
-          caption = { "gui.tgps-auto-create-groups" },
-          tooltip = { "gui.tgps-auto-create-groups-tooltip" },
-          handler = auto_create_groups,
+          type = "flow",
+          style = "centering_horizontal_flow",
+          { type = "label", name = "groups_count_label", style = "subheader_caption_label" },
+          { type = "empty-widget", style = "flib_horizontal_pusher" },
+          {
+            type = "button",
+            caption = { "gui.tgps-auto-create-groups" },
+            tooltip = { "gui.tgps-auto-create-groups-tooltip" },
+            handler = auto_create_groups,
+          },
         },
       },
     },
