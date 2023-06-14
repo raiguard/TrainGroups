@@ -230,6 +230,7 @@ local function build_gui(player, train)
   local self = {
     elems = elems,
     player = player,
+    train_id = train.id,
     train = train,
   }
 
@@ -259,6 +260,27 @@ local function on_gui_closed(e)
   end
 end
 
+--- @param e EventData.on_train_created
+local function on_train_created(e)
+  if not global.change_group_guis then
+    return
+  end
+  if not e.old_train_id_1 and not e.old_train_id_2 then
+    return
+  end
+  for _, self in pairs(global.change_group_guis) do
+    if self.train.valid then
+      goto continue
+    end
+    if self.train_id == e.old_train_id_1 or self.train_id == e.old_train_id_2 then
+      self.train = e.train
+      self.train_id = e.train.id
+      update(self)
+    end
+    ::continue::
+  end
+end
+
 --- @param e on_se_train_teleported
 local function on_se_elevator_teleport_started(e)
   -- XXX: on_gui_closed isn't raised when a train starts going through an elevator
@@ -279,9 +301,10 @@ end
 
 change_group_gui.events = {
   [defines.events.on_gui_closed] = on_gui_closed,
+  [defines.events.on_train_created] = on_train_created,
 }
 
-change_group_gui.add_remote_interface = function()
+function change_group_gui.add_remote_interface()
   if
     not script.active_mods["space-exploration"]
     or not remote.interfaces["space-exploration"]["get_on_train_teleport_started_event"]

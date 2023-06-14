@@ -8,6 +8,7 @@ local util = require("__TrainGroups__/scripts/util")
 local function update(self, train)
   if train then
     self.train = train
+    self.train_id = train.id
   end
   local caption = { "gui.tgps-no-group-assigned" }
   local train_data = global.trains[self.train.id]
@@ -75,6 +76,7 @@ local function build_gui(player, train)
   local self = {
     button = elems.button,
     player = player,
+    train_id = train.id,
     train = train,
     window = elems.tgps_train_window,
   }
@@ -115,6 +117,25 @@ local function on_gui_opened(e)
   update(self, entity.train)
 end
 
+--- @param e EventData.on_train_created
+local function on_train_created(e)
+  if not global.train_guis then
+    return
+  end
+  if not e.old_train_id_1 and not e.old_train_id_2 then
+    return
+  end
+  for _, self in pairs(global.train_guis) do
+    if self.train.valid then
+      goto continue
+    end
+    if self.train_id == e.old_train_id_1 or self.train_id == e.old_train_id_2 then
+      update(self, e.train)
+    end
+    ::continue::
+  end
+end
+
 --- @class TrainGuiMod
 local train_gui = {}
 
@@ -131,6 +152,7 @@ end
 
 train_gui.events = {
   [defines.events.on_gui_opened] = on_gui_opened,
+  [defines.events.on_train_created] = on_train_created,
   [util.update_train_gui_event] = on_update_train_gui,
 }
 
