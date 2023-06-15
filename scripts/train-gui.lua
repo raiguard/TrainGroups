@@ -41,7 +41,7 @@ local function destroy_gui(player_index)
   if window and window.valid then
     window.destroy()
   end
-  global.train_guis[self.player.index] = nil
+  global.train_guis[player_index] = nil
 end
 
 --- @param player LuaPlayer

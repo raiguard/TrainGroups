@@ -33,7 +33,7 @@ local function destroy_gui(player_index)
     overlay.destroy()
   end
 
-  if not game.is_multiplayer() then
+  if not game.is_multiplayer() and self.player.input_method == defines.input_method.keyboard_and_mouse then
     script.raise_event(util.update_train_gui_event, { player_index = self.player.index })
     return true
   end
@@ -239,7 +239,7 @@ local function build_gui(player, train)
     train = train,
   }
 
-  if game.is_multiplayer() then
+  if game.is_multiplayer() or self.player.input_method == defines.input_method.game_controller then
     player.opened = self.elems.tgps_change_group_window
   end
 
