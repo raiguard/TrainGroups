@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.2
-Date: ????
+Date: 2023-06-15
   Changes:
     - Made adjustments to better support game controllers.
   Bugfixes:
