@@ -2,6 +2,8 @@
 Version: 1.4.2
 Date: ????
   Changes:
+  Bugfixes:
+    - Fixed a crash when a player is removed on configuration changed.
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.1
 Date: 2023-06-14

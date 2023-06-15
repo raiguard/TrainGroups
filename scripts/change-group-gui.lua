@@ -18,6 +18,12 @@ local function destroy_gui(player_index)
   if not self then
     return false
   end
+  global.change_group_guis[player_index] = nil
+
+  if not self.player.valid then
+    return false
+  end
+
   local window = self.elems.tgps_change_group_window
   if window.valid then
     window.destroy()
@@ -26,7 +32,6 @@ local function destroy_gui(player_index)
   if overlay and overlay.valid then
     overlay.destroy()
   end
-  global.change_group_guis[self.player.index] = nil
 
   if not game.is_multiplayer() then
     script.raise_event(util.update_train_gui_event, { player_index = self.player.index })
