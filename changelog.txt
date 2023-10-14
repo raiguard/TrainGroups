@@ -3,6 +3,7 @@ Version: 1.4.3
 Date: ????
   Bugfixes:
     - Fixed a crash when creating a group when a train has only temporary stations in its schedule. (#21)
+    - Fixed that the change group GUI would get stuck on screen if the train was destroyed. (#22)
 ---------------------------------------------------------------------------------------------------
 Version: 1.4.2
 Date: 2023-06-15

@@ -33,7 +33,11 @@ local function destroy_gui(player_index)
     overlay.destroy()
   end
 
-  if not game.is_multiplayer() and self.player.input_method == defines.input_method.keyboard_and_mouse then
+  if
+    not game.is_multiplayer()
+    and self.player.input_method == defines.input_method.keyboard_and_mouse
+    and self.train.valid
+  then
     script.raise_event(util.update_train_gui_event, { player_index = self.player.index })
     return true
   end
@@ -328,19 +332,22 @@ flib_gui.add_handlers({
   cg_update = update,
 }, function(e, handler)
   local self = global.change_group_guis[e.player_index]
-  if not self and self.train.valid then
+  if not self then
     return
   end
   if not self.train.valid then
     if self.player.opened_gui_type ~= defines.gui_type.entity then
+      destroy_gui(self.player.index)
       return
     end
     local opened = self.player.opened
     if not opened or opened.type ~= "locomotive" then
+      destroy_gui(self.player.index)
       return
     end
     local train = opened.train
     if not train or not train.valid then
+      destroy_gui(self.player.index)
       return
     end
     self.train = train --[[@as LuaTrain]]
