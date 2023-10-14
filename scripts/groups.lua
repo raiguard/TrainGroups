@@ -104,7 +104,7 @@ local function change_train_group(train_data, new_group)
     group_trains[train_data.id] = train_data
 
     local train = train_data.train
-    if not train_data.ignore_schedule and group_data.schedule then
+    if not train_data.ignore_schedule and group_data.schedule and #group_data.schedule > 0 then
       -- Set to the first station of the same name in the group, if any
       local active_index = 1
       local current_schedule = train.schedule
